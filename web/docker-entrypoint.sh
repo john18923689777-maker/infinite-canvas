@@ -15,9 +15,17 @@ sanitize_bool() {
     [ "$1" = "true" ] && printf 'true' || printf 'false'
 }
 
+sanitize_text() {
+    printf '%s' "$1" | tr -cd 'A-Za-z0-9._:/-'
+}
+
 GA4_ID=$(sanitize_id "${ANALYTICS_GA4_ID:-}")
 BAIDU_ID=$(sanitize_id "${ANALYTICS_BAIDU_ID:-}")
 CUSTOMER_MODE=$(sanitize_bool "${CUSTOMER_MODE:-}")
+SOURCE_COMMIT=$(sanitize_text "${SOURCE_COMMIT:-unknown}")
+SOURCE_URL=$(sanitize_text "${SOURCE_URL:-}")
+IMAGE_TAG=$(sanitize_text "${IMAGE_TAG:-unknown}")
+BUILD_TIMESTAMP=$(sanitize_text "${BUILD_TIMESTAMP:-unknown}")
 
 cat > /usr/share/nginx/html/config.js <<EOF
 window.__RUNTIME_CONFIG__ = {
@@ -25,4 +33,13 @@ window.__RUNTIME_CONFIG__ = {
   ANALYTICS_GA4_ID: "${GA4_ID}",
   ANALYTICS_BAIDU_ID: "${BAIDU_ID}"
 };
+EOF
+
+cat > /usr/share/nginx/html/build-info.json <<EOF
+{
+  "source_commit": "${SOURCE_COMMIT}",
+  "source_url": "${SOURCE_URL}",
+  "image_tag": "${IMAGE_TAG}",
+  "build_timestamp": "${BUILD_TIMESTAMP}"
+}
 EOF

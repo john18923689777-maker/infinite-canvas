@@ -26,3 +26,7 @@ Customer builds exclude upstream developer and uncontrolled-extension capabiliti
 These restrictions are part of the customer-mode product boundary and must remain disabled in customer release artifacts.
 
 The README advertises upstream full-workbench capabilities for attribution, while customer builds disable the paths listed above.
+
+## Build provenance
+
+Each customer image records `source_commit`, `source_url`, `image_tag` and `build_timestamp` at `/build-info.json`. The source URL must point to the public modified-fork commit that produced the image, not only to the upstream project.

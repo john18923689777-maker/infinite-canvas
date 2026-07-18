@@ -12,14 +12,17 @@ function generateRuntimeConfig(customerMode?: string) {
     temporaryDirectories.push(directory);
     const outputPath = join(directory, "config.js");
     const scriptPath = join(directory, "docker-entrypoint.sh");
-    const script = readFileSync(entrypointPath, "utf8").replace("/usr/share/nginx/html/config.js", outputPath);
+    const buildInfoPath = join(directory, "build-info.json");
+    const script = readFileSync(entrypointPath, "utf8")
+        .replaceAll("/usr/share/nginx/html/config.js", outputPath)
+        .replaceAll("/usr/share/nginx/html/build-info.json", buildInfoPath);
     writeFileSync(scriptPath, script);
     const env = { ...process.env };
     if (customerMode === undefined) delete env.CUSTOMER_MODE;
     else env.CUSTOMER_MODE = customerMode;
     const result = spawnSync("sh", [scriptPath], { env, encoding: "utf8" });
     expect(result.status, result.stderr).toBe(0);
-    return readFileSync(outputPath, "utf8");
+    return { config: readFileSync(outputPath, "utf8"), buildInfo: readFileSync(join(directory, "build-info.json"), "utf8") };
 }
 
 afterEach(() => {
@@ -28,18 +31,26 @@ afterEach(() => {
 
 describe("Docker runtime customer mode", () => {
     it("emits exact true as a JavaScript boolean", () => {
-        expect(generateRuntimeConfig("true")).toContain("CUSTOMER_MODE: true");
+        expect(generateRuntimeConfig("true").config).toContain("CUSTOMER_MODE: true");
     });
 
     it.each([undefined, "", "false", "TRUE", "yes", "1"])("emits false for %p", (value) => {
-        expect(generateRuntimeConfig(value)).toContain("CUSTOMER_MODE: false");
+        expect(generateRuntimeConfig(value).config).toContain("CUSTOMER_MODE: false");
     });
 
     it("does not interpolate malformed input into JavaScript", () => {
         const payload = 'true }; globalThis.injected = "yes"; //';
-        const config = generateRuntimeConfig(payload);
+        const config = generateRuntimeConfig(payload).config;
         expect(config).toContain("CUSTOMER_MODE: false");
         expect(config).not.toContain(payload);
         expect(config).not.toContain("globalThis.injected");
+    });
+
+    it("emits sanitized build provenance without secrets", () => {
+        const result = generateRuntimeConfig("true");
+        const info = JSON.parse(result.buildInfo) as Record<string, string>;
+        expect(info.source_commit).toBe("unknown");
+        expect(result.config).not.toContain("Authorization");
+        expect(result.config).not.toContain("apiKey");
     });
 });
