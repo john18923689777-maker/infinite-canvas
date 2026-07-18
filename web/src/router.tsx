@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { AnalyticsTracker } from "@/components/layout/analytics-tracker";
 import UserLayout from "@/layouts/user-layout";
@@ -11,15 +11,29 @@ import ImagePage from "@/pages/image";
 import NotFound from "@/pages/not-found";
 import PromptsPage from "@/pages/prompts";
 import VideoPage from "@/pages/video";
+import { customerRouteRedirect } from "@/lib/customer-mode";
+
+function GuardedUserLayout() {
+    const { pathname } = useLocation();
+    const redirectPath = customerRouteRedirect(pathname);
+    if (redirectPath) return <Navigate to={redirectPath} replace />;
+    return (
+        <UserLayout>
+            <AnalyticsTracker />
+            <Outlet />
+        </UserLayout>
+    );
+}
+
+function GuardedNotFound() {
+    const { pathname } = useLocation();
+    const redirectPath = customerRouteRedirect(pathname);
+    return redirectPath ? <Navigate to={redirectPath} replace /> : <NotFound />;
+}
 
 export const router = createBrowserRouter([
     {
-        element: (
-            <UserLayout>
-                <AnalyticsTracker />
-                <Outlet />
-            </UserLayout>
-        ),
+        element: <GuardedUserLayout />,
         children: [
             { path: "/", element: <HomePage /> },
             { path: "/image", element: <ImagePage /> },
@@ -31,5 +45,5 @@ export const router = createBrowserRouter([
             { path: "/config", element: <ConfigPage /> },
         ],
     },
-    { path: "*", element: <NotFound /> },
+    { path: "*", element: <GuardedNotFound /> },
 ]);

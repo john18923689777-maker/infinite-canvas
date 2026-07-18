@@ -5,6 +5,12 @@ type CustomerModeInputs = {
 
 const CUSTOMER_QUERY_KEYS = ["baseUrl", "baseurl", "apiKey", "apikey", "agentUrl", "agentToken"] as const;
 
+export type AppRouteId = "home" | "image" | "video" | "assets" | "prompts" | "canvas" | "canvas-project" | "config";
+
+export const CUSTOMER_DEFAULT_PATH = "/image";
+
+const CUSTOMER_ROUTE_IDS: ReadonlySet<AppRouteId> = new Set(["image", "assets", "canvas", "canvas-project"]);
+
 function isExactTrue(value: unknown) {
     return value === true || value === "true";
 }
@@ -16,6 +22,24 @@ export function resolveCustomerMode({ build, runtime }: CustomerModeInputs): boo
 export function isCustomerMode(): boolean {
     const runtime = typeof window !== "undefined" ? window.__RUNTIME_CONFIG__?.CUSTOMER_MODE : undefined;
     return resolveCustomerMode({ build: import.meta.env.VITE_CUSTOMER_MODE, runtime });
+}
+
+export function isCustomerRouteAllowed(routeId: AppRouteId): boolean {
+    return !isCustomerMode() || CUSTOMER_ROUTE_IDS.has(routeId);
+}
+
+function routeIdFromPath(pathname: string): AppRouteId | null {
+    const normalized = pathname !== "/" ? pathname.replace(/\/+$/, "") : pathname;
+    if (normalized === "/") return "home";
+    if (/^\/canvas\/[^/]+$/.test(normalized)) return "canvas-project";
+    const slug = normalized.slice(1);
+    return ["image", "video", "assets", "prompts", "canvas", "config"].includes(slug) ? (slug as AppRouteId) : null;
+}
+
+export function customerRouteRedirect(pathname: string): string | null {
+    if (!isCustomerMode()) return null;
+    const routeId = routeIdFromPath(pathname);
+    return routeId && isCustomerRouteAllowed(routeId) ? null : CUSTOMER_DEFAULT_PATH;
 }
 
 function currentOrigin() {

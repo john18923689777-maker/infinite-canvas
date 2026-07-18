@@ -1,5 +1,7 @@
 import { FileText, ImagePlus, Images, Maximize2, Settings2, Video } from "lucide-react";
 
+import { isCustomerRouteAllowed } from "@/lib/customer-mode";
+
 export const navigationTools = [
     {
         slug: "canvas",
@@ -34,3 +36,7 @@ export const navigationTools = [
 ] as const;
 
 export type NavigationToolSlug = (typeof navigationTools)[number]["slug"];
+
+export function getNavigationTools() {
+    return navigationTools.filter((tool) => isCustomerRouteAllowed(tool.slug));
+}
