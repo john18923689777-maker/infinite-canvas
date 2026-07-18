@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { localForageStorage } from "@/lib/localforage-storage";
+import { assertCapabilityEnabled } from "@/lib/customer-mode";
 
 export type InstalledPlugin = {
     id: string;
@@ -27,15 +28,17 @@ export const usePluginStore = create<PluginStore>()(
     persist(
         (set) => ({
             plugins: [],
-            upsert: (plugin) =>
-                set((state) => {
+            upsert: (plugin) => {
+                assertCapabilityEnabled();
+                return set((state) => {
                     const installedAt = plugin.installedAt || new Date().toISOString();
                     const exists = state.plugins.some((item) => item.id === plugin.id);
                     const next = { ...plugin, installedAt };
                     return { plugins: exists ? state.plugins.map((item) => (item.id === plugin.id ? next : item)) : [next, ...state.plugins] };
-                }),
-            setEnabled: (id, enabled) => set((state) => ({ plugins: state.plugins.map((item) => (item.id === id ? { ...item, enabled } : item)) })),
-            remove: (id) => set((state) => ({ plugins: state.plugins.filter((item) => item.id !== id) })),
+                });
+            },
+            setEnabled: (id, enabled) => { assertCapabilityEnabled(); set((state) => ({ plugins: state.plugins.map((item) => (item.id === id ? { ...item, enabled } : item)) })); },
+            remove: (id) => { assertCapabilityEnabled(); set((state) => ({ plugins: state.plugins.filter((item) => item.id !== id) })); },
         }),
         {
             name: "infinite-canvas:plugin_store",

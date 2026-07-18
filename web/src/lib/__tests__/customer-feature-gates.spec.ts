@@ -21,10 +21,14 @@ describe("customer capability gates", () => {
         const fetchSpy = vi.spyOn(globalThis, "fetch");
         const { installPluginFromUrl, ensurePluginsLoaded, activatePlugin } = await import("@/lib/canvas/plugin-loader");
         const { fetchOfficialPlugins } = await import("@/lib/canvas/plugin-registry");
+        const { usePluginStore } = await import("@/stores/canvas/use-plugin-store");
+        const { runSiteTool } = await import("@/lib/agent/agent-site-tools");
         await expect(installPluginFromUrl("https://plugins.example/p.js")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         await expect(fetchOfficialPlugins()).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         await expect(ensurePluginsLoaded()).resolves.toBeUndefined();
         expect(() => activatePlugin({ id: "x", nodes: [{ type: "x" }] } as never)).toThrow(CUSTOMER_MODE_DISABLED);
+        expect(() => usePluginStore.getState().upsert({ id: "x", name: "x", version: "1", url: "https://x", source: "", enabled: true })).toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(runSiteTool("workbench_video_generate", {}, (() => {}) as never)).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         expect(fetchSpy).not.toHaveBeenCalled();
     });
 

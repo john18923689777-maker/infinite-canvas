@@ -15,6 +15,12 @@ export type UploadedImage = {
 const store = localforage.createInstance({ name: "infinite-canvas", storeName: "image_files" });
 const objectUrls = new Map<string, string>();
 
+export const IMAGE_FILES_STORE_NAME = "image_files";
+
+export function imageFilesStorageName() {
+    return IMAGE_FILES_STORE_NAME;
+}
+
 export async function uploadImage(input: string | Blob): Promise<UploadedImage> {
     const blob = typeof input === "string" ? await (await fetch(input)).blob() : input;
     const storageKey = `image:${nanoid()}`;

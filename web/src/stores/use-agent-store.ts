@@ -62,8 +62,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     panelMounted: true,
     panelClosing: false,
     canvasContext: null,
-    url: typeof window === "undefined" ? "http://127.0.0.1:17371" : localStorage.getItem("canvas-agent-url") || "http://127.0.0.1:17371",
-    token: typeof window === "undefined" ? "" : localStorage.getItem("canvas-agent-token") || "",
+    url: isCustomerMode() ? "" : typeof window === "undefined" ? "http://127.0.0.1:17371" : localStorage.getItem("canvas-agent-url") || "http://127.0.0.1:17371",
+    token: isCustomerMode() ? "" : typeof window === "undefined" ? "" : localStorage.getItem("canvas-agent-token") || "",
     connected: false,
     enabled: false,
     silentConnect: false,
@@ -123,13 +123,14 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         set({ url: endpoint, token, enabled: true, silentConnect: silent, activity: "连接中", connectError: "" });
     },
     disconnectAgent: (patch = {}) => {
+        if (isCustomerMode()) return set({ enabled: false, connected: false, panelOpen: false, canvasContext: null, connectError: CUSTOMER_MODE_DISABLED, activity: "离线" });
         agentSource?.close();
         agentSource = null;
         if (connectTimer) clearTimeout(connectTimer);
         connectTimer = null;
         set({ enabled: false, connected: false, silentConnect: false, activity: "离线", ...patch });
     },
-    addMessage: (item) => set((state) => ({ messages: [...state.messages.slice(-120), item] })),
-    addEventLog: (item) => set((state) => ({ eventLogs: [...state.eventLogs.slice(-160), item] })),
-    clearEventLogs: () => set({ eventLogs: [] }),
+    addMessage: (item) => { if (isCustomerMode()) return; set((state) => ({ messages: [...state.messages.slice(-120), item] })); },
+    addEventLog: (item) => { if (isCustomerMode()) return; set((state) => ({ eventLogs: [...state.eventLogs.slice(-160), item] })); },
+    clearEventLogs: () => { if (isCustomerMode()) return; set({ eventLogs: [] }); },
 }));

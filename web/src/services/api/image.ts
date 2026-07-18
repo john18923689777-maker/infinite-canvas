@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { buildApiUrl, resolveModelRequestConfig, resolveModelScript, type AiConfig, type ModelChannel } from "@/stores/use-config-store";
+import { buildApiUrl, modelOptionName, resolveModelRequestConfig, resolveModelScript, type AiConfig, type ModelChannel } from "@/stores/use-config-store";
 import { normalizePluginImages, runModelPlugin } from "./model-plugin";
 import { nanoid } from "nanoid";
 import { dataUrlToFile } from "@/lib/image-utils";
@@ -125,6 +125,10 @@ function normalizeQuality(quality: string) {
 /** Only "transparent" is forwarded; any other value (incl. empty) means keep the default opaque background. */
 function normalizeBackground(background: string | undefined) {
     return background?.trim().toLowerCase() === "transparent" ? "transparent" : undefined;
+}
+
+export function normalizeImageBackgroundForModel(model: string, background: string | undefined) {
+    return modelOptionName(model).toLowerCase() === "gpt-image-2" ? undefined : normalizeBackground(background);
 }
 
 /** Map "quality + ratio" to an explicit pixel dimension like "3840x2160". */
@@ -666,7 +670,7 @@ export async function requestGeneration(config: AiConfig, prompt: string, option
     if (script) {
         const quality = normalizeQuality(config.quality);
         const requestSize = resolveRequestSize(quality, config.size);
-        const background = normalizeBackground(config.background);
+        const background = normalizeImageBackgroundForModel(requestConfig.model, config.background);
         try {
             const result = await runModelPlugin({
                 capability: "image",
@@ -691,7 +695,7 @@ export async function requestGeneration(config: AiConfig, prompt: string, option
     }
     const quality = normalizeQuality(config.quality);
     const requestSize = resolveRequestSize(quality, config.size);
-    const background = normalizeBackground(config.background);
+    const background = normalizeImageBackgroundForModel(requestConfig.model, config.background);
     try {
         const response = await axios.post<ImageApiResponse>(
             aiApiUrl(requestConfig, "/images/generations"),
@@ -725,7 +729,7 @@ export async function requestEdit(config: AiConfig, prompt: string, references: 
     if (script) {
         const quality = normalizeQuality(config.quality);
         const requestSize = resolveRequestSize(quality, config.size);
-        const background = normalizeBackground(config.background);
+        const background = normalizeImageBackgroundForModel(requestConfig.model, config.background);
         const refs = await Promise.all(references.map((image) => imageToDataUrl(image)));
         try {
             const result = await runModelPlugin({
@@ -752,7 +756,7 @@ export async function requestEdit(config: AiConfig, prompt: string, references: 
     }
     const quality = normalizeQuality(config.quality);
     const requestSize = resolveRequestSize(quality, config.size);
-    const background = normalizeBackground(config.background);
+    const background = normalizeImageBackgroundForModel(requestConfig.model, config.background);
     const formData = new FormData();
     formData.set("model", requestConfig.model);
     formData.set("prompt", withSystemPrompt(requestConfig, requestPrompt));

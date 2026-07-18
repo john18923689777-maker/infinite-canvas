@@ -7,6 +7,7 @@ import { installPluginFromUrl, setPluginEnabled, uninstallPlugin, updatePlugin }
 import { fetchOfficialPlugins, hasUpgrade, type OfficialPluginEntry } from "@/lib/canvas/plugin-registry";
 import { useThemeStore } from "@/stores/use-theme-store";
 import { usePluginStore, type InstalledPlugin } from "@/stores/canvas/use-plugin-store";
+import { isCustomerMode } from "@/lib/customer-mode";
 
 export function CanvasPluginManagerModal({ open, onClose }: { open: boolean; onClose: () => void }) {
     const theme = canvasThemes[useThemeStore((state) => state.theme)];
@@ -19,6 +20,7 @@ export function CanvasPluginManagerModal({ open, onClose }: { open: boolean; onC
     const [official, setOfficial] = useState<OfficialPluginEntry[]>([]);
     const [loadingOfficial, setLoadingOfficial] = useState(false);
     const [officialError, setOfficialError] = useState<string | null>(null);
+    const customerMode = isCustomerMode();
 
     const recordById = useMemo(() => new Map(plugins.map((item) => [item.id, item])), [plugins]);
     const localPlugins = useMemo(() => plugins.filter((item) => item.local), [plugins]);
@@ -38,8 +40,10 @@ export function CanvasPluginManagerModal({ open, onClose }: { open: boolean; onC
 
     // 打开面板时拉取官方清单(仅在尚未加载过时,避免重复请求)
     useEffect(() => {
-        if (open && official.length === 0 && !loadingOfficial && !officialError) void loadOfficial();
-    }, [open, official.length, loadingOfficial, officialError, loadOfficial]);
+        if (!customerMode && open && official.length === 0 && !loadingOfficial && !officialError) void loadOfficial();
+    }, [customerMode, open, official.length, loadingOfficial, officialError, loadOfficial]);
+
+    if (customerMode) return null;
 
     const handleInstallUrl = async () => {
         const target = url.trim();

@@ -8,6 +8,7 @@ import { useCanvasStore } from "@/stores/canvas/use-canvas-store";
 import { useAssetStore } from "@/stores/use-asset-store";
 import { modelOptionLabel, modelOptionName, normalizeModelOptionValue, selectableModelsByCapability, useConfigStore } from "@/stores/use-config-store";
 import { useWorkbenchAgentStore } from "@/stores/use-workbench-agent-store";
+import { assertCapabilityEnabled } from "@/lib/customer-mode";
 
 // 在网页端执行 Agent 的「站点级」工具（画布列表、工作台生成、提示词搜索、资产增删查等）。
 // 这些工具的数据都在浏览器本地（localforage / zustand），因此由本模块直接读写对应 store 后返回结果。
@@ -43,6 +44,7 @@ export const SITE_TOOL_LABELS: Record<SiteToolName, string> = {
 type SiteToolInput = Record<string, unknown>;
 
 export async function runSiteTool(name: SiteToolName, input: SiteToolInput, navigate: NavigateFunction): Promise<unknown> {
+    assertCapabilityEnabled();
     switch (name) {
         case "canvas_list_projects":
             return listCanvasProjects(input);
