@@ -24,3 +24,5 @@ Customer builds exclude upstream developer and uncontrolled-extension capabiliti
 - Default third-party prompt-source feeds.
 
 These restrictions are part of the customer-mode product boundary and must remain disabled in customer release artifacts.
+
+The README advertises upstream full-workbench capabilities for attribution, while customer builds disable the paths listed above.
