@@ -24,6 +24,10 @@
 
 无限画布是一款面向图片创作的开源工作台。它把画布编排、AI 图片生成、参考图编辑、对话助手、提示词库和素材沉淀放在同一个界面里，适合用来探索视觉方案并连续迭代图片结果。
 
+## Sub2 Customer Fork Attribution
+
+This customer fork is based on [basketikun/infinite-canvas](https://github.com/basketikun/infinite-canvas) at upstream commit [`bdca6b0a5c193b8c85dfbf7c6a433d62f02da9df`](https://github.com/basketikun/infinite-canvas/commit/bdca6b0a5c193b8c85dfbf7c6a433d62f02da9df). It remains available under the upstream [AGPL-3.0 license](LICENSE). Customer-mode provenance and source-offer requirements are recorded in [CUSTOMER_MODE.md](CUSTOMER_MODE.md).
+
 > [!CAUTION]
 > 项目目前处于开发阶段，不保证历史数据兼容。各种本地存储格式都可能直接调整，欢迎关注后续更新，当前更适合个人/本地部署，不建议直接公网多人共用。
 >
