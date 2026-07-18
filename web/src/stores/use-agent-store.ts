@@ -82,8 +82,14 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     activity: "就绪",
     connectError: "",
     pendingTool: null,
-    setAgentState: (patch) => set(patch),
-    openPanel: () => set({ panelOpen: true, panelMounted: true, panelClosing: false }),
+    setAgentState: (patch) => {
+        if (isCustomerMode()) return set({ enabled: false, connected: false, connectError: CUSTOMER_MODE_DISABLED, activity: "离线" });
+        set(patch);
+    },
+    openPanel: () => {
+        if (isCustomerMode()) return set({ panelOpen: false, enabled: false, connected: false, connectError: CUSTOMER_MODE_DISABLED, activity: "离线" });
+        set({ panelOpen: true, panelMounted: true, panelClosing: false });
+    },
     closePanel: () => {
         if (!get().panelMounted || get().panelClosing) return;
         set({ panelOpen: false, panelClosing: true });
@@ -91,8 +97,14 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
             if (get().panelClosing) set({ panelMounted: false, panelClosing: false });
         }, CANVAS_AGENT_PANEL_MOTION_MS);
     },
-    togglePanel: () => (get().panelOpen ? get().closePanel() : get().openPanel()),
-    setCanvasContext: (canvasContext) => set({ canvasContext }),
+    togglePanel: () => {
+        if (isCustomerMode()) return get().openPanel();
+        return get().panelOpen ? get().closePanel() : get().openPanel();
+    },
+    setCanvasContext: (canvasContext) => {
+        if (isCustomerMode()) return;
+        set({ canvasContext });
+    },
     connectAgent: (options) => {
         if (isCustomerMode()) return set({ enabled: false, connected: false, connectError: CUSTOMER_MODE_DISABLED, activity: "离线" });
         const silent = options?.silent ?? false;

@@ -3,6 +3,8 @@ type CustomerModeInputs = {
     runtime?: unknown;
 };
 
+import type { ConfigTabKey, ModelCapability, ModelChannel } from "@/stores/use-config-store";
+
 export const CUSTOMER_MODE_DISABLED = "CUSTOMER_MODE_DISABLED";
 
 export function assertCustomerModeDisabled(): never {
@@ -18,6 +20,40 @@ const CUSTOMER_QUERY_KEYS = ["baseUrl", "baseurl", "apiKey", "apikey", "agentUrl
 export type AppRouteId = "home" | "image" | "video" | "assets" | "prompts" | "canvas" | "canvas-project" | "config";
 
 export const CUSTOMER_DEFAULT_PATH = "/image";
+
+const CONFIG_TAB_KEYS: ConfigTabKey[] = ["channels", "preferences", "prompt-sources", "webdav"];
+const CUSTOMER_CONFIG_TAB_KEYS: ConfigTabKey[] = ["channels"];
+const CUSTOMER_SUPPORTED_CAPABILITIES: ReadonlySet<ModelCapability> = new Set(["image", "text"]);
+
+export function customerConfigTabKeys(): ConfigTabKey[] {
+    return isCustomerMode() ? [...CUSTOMER_CONFIG_TAB_KEYS] : [...CONFIG_TAB_KEYS];
+}
+
+/** Normalize a channel at the UI and persistence boundaries in customer mode. */
+export function customerConfigChannel(channel: ModelChannel): ModelChannel {
+    if (!isCustomerMode()) return channel;
+    return {
+        ...channel,
+        baseUrl: channel.apiFormat === "gemini" ? customerGeminiBaseUrl() : customerOpenAIBaseUrl(),
+        models: (Array.isArray(channel.models) ? channel.models : [])
+            .filter((model) => CUSTOMER_SUPPORTED_CAPABILITIES.has(model.capability))
+            .map(({ name, capability }) => ({ name, capability })),
+    };
+}
+
+export function customerConfigChannels(channels: ModelChannel[]): ModelChannel[] {
+    if (!isCustomerMode()) return channels;
+    const byFormat = new Map<"openai" | "gemini", ModelChannel>();
+    for (const channel of Array.isArray(channels) ? channels : []) {
+        const normalized = customerConfigChannel(channel);
+        if (!byFormat.has(normalized.apiFormat)) byFormat.set(normalized.apiFormat, normalized);
+    }
+    return Array.from(byFormat.values());
+}
+
+export function customerConfigCapabilityAllowed(capability: ModelCapability) {
+    return !isCustomerMode() || CUSTOMER_SUPPORTED_CAPABILITIES.has(capability);
+}
 
 const CUSTOMER_ROUTE_IDS: ReadonlySet<AppRouteId> = new Set(["image", "assets", "canvas", "canvas-project"]);
 

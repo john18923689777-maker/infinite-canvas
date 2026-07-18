@@ -31,9 +31,13 @@ describe("customer capability gates", () => {
     it("fails closed for WebDAV and model/prompt scripts", async () => {
         const fetchSpy = vi.spyOn(globalThis, "fetch");
         const { testWebdavConnection } = await import("@/services/webdav-sync");
+        const { syncAppDataToWebdav } = await import("@/services/app-sync");
         const { runModelPlugin } = await import("@/services/api/model-plugin");
         const { runPromptSource } = await import("@/services/api/prompt-source-runtime");
         await expect(testWebdavConnection({ url: "https://dav.example", directory: "", username: "", password: "", lastSyncedAt: "" })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        const progress = vi.fn();
+        await expect(syncAppDataToWebdav({ url: "https://dav.example", directory: "", username: "", password: "", lastSyncedAt: "" }, progress)).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        expect(progress).not.toHaveBeenCalled();
         await expect(runModelPlugin({ capability: "text", script: "return 1", config: { model: "m", baseUrl: "", apiKey: "" } as never })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         await expect(runPromptSource("return []")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         expect(fetchSpy).not.toHaveBeenCalled();
@@ -43,7 +47,16 @@ describe("customer capability gates", () => {
         const { useAgentStore } = await import("@/stores/use-agent-store");
         const state = useAgentStore.getState();
         state.connectAgent();
+        state.setAgentState({ enabled: true, connected: true, url: "https://agent.example", token: "secret" });
+        state.openPanel();
+        state.togglePanel();
+        state.setCanvasContext({ snapshot: {} as never, applyOps: () => ({} as never), undoOps: () => null, canUndo: false });
         expect(useAgentStore.getState().enabled).toBe(false);
+        expect(useAgentStore.getState().connected).toBe(false);
+        expect(useAgentStore.getState().panelOpen).toBe(false);
+        expect(useAgentStore.getState().url).not.toBe("https://agent.example");
+        expect(useAgentStore.getState().token).not.toBe("secret");
+        expect(useAgentStore.getState().canvasContext).toBe(null);
         expect(useAgentStore.getState().connectError).toBe(CUSTOMER_MODE_DISABLED);
     });
 

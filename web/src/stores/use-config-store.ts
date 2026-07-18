@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 
-import { customerGeminiBaseUrl, customerOpenAIBaseUrl, isCustomerMode } from "@/lib/customer-mode";
+import { customerConfigChannels, customerGeminiBaseUrl, customerOpenAIBaseUrl, isCustomerMode } from "@/lib/customer-mode";
 
 export type ApiCallFormat = "openai" | "gemini";
 export type ModelCapability = "image" | "video" | "text" | "audio";
@@ -355,7 +355,7 @@ function normalizeChannels(config: AiConfig) {
             }),
         );
     }
-    return channels;
+    return normalizeChannelsForCustomer(channels);
 }
 
 export function defaultBaseUrlForApiFormat(apiFormat: ApiCallFormat) {
@@ -370,7 +370,7 @@ function normalizeBaseUrl(baseUrl: string | undefined, apiFormat: ApiCallFormat)
 }
 
 function normalizeChannelsForCustomer(channels: ModelChannel[]) {
-    return (Array.isArray(channels) ? channels : []).map((channel) => ({ ...channel, baseUrl: normalizeBaseUrl(channel.baseUrl, channel.apiFormat) }));
+    return customerConfigChannels(Array.isArray(channels) ? channels : []).map((channel) => ({ ...channel, baseUrl: normalizeBaseUrl(channel.baseUrl, channel.apiFormat) }));
 }
 
 function normalizeApiFormat(apiFormat: unknown): ApiCallFormat {

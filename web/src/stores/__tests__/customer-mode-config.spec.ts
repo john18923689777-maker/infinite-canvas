@@ -36,6 +36,30 @@ describe("customer-mode config normalization", () => {
         expect(config.channels[0]).toMatchObject({ baseUrl: window.location.origin, apiKey: "kept-key", models });
     });
 
+    it("removes disabled capabilities and scripts from live customer updates", async () => {
+        vi.stubEnv("VITE_CUSTOMER_MODE", "true");
+        const { useConfigStore } = await import("@/stores/use-config-store");
+
+        useConfigStore.getState().updateConfig("channels", [
+            {
+                id: "customer",
+                name: "Customer",
+                baseUrl: "https://external.example",
+                apiKey: "key",
+                apiFormat: "openai",
+                models: [
+                    { name: "gpt-image-2", capability: "image", script: "return 1" },
+                    { name: "veo-3", capability: "video", script: "return 2" },
+                    { name: "tts-1", capability: "audio" },
+                ],
+            },
+        ]);
+
+        const channel = useConfigStore.getState().config.channels[0];
+        expect(channel.baseUrl).toBe(window.location.origin);
+        expect(channel.models).toEqual([{ name: "gpt-image-2", capability: "image" }]);
+    });
+
     it("normalizes persisted external and decorated same-origin URLs during rehydration", async () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         const { CONFIG_STORE_KEY, useConfigStore } = await import("@/stores/use-config-store");

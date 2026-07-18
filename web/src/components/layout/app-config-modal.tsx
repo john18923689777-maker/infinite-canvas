@@ -8,6 +8,7 @@ import { ConfigPromptSources } from "@/components/layout/config-prompt-sources";
 import { syncAppDataToWebdav, type AppSyncDomainKey, type AppSyncProgressEvent } from "@/services/app-sync";
 import { testWebdavConnection, WEBDAV_MANIFEST_FILE_NAME } from "@/services/webdav-sync";
 import { audioFormatOptions, audioVoiceOptions, normalizeAudioSpeedValue } from "@/lib/audio-generation";
+import { customerConfigChannel, customerConfigTabKeys, isCustomerMode } from "@/lib/customer-mode";
 import { createModelChannel, modelOptionsFromChannels, normalizeModelOptionValue, selectableModelsByCapability, useConfigStore, type AiConfig, type ApiCallFormat, type ConfigTabKey, type ModelCapability, type ModelChannel } from "@/stores/use-config-store";
 
 type ModelGroup = {
@@ -66,7 +67,8 @@ export function AppConfigPanel({ showDoneButton = false, initialTab = "channels"
     const clearPromptContinue = useConfigStore((state) => state.clearPromptContinue);
     const webdavReady = Boolean(webdav.url.trim());
     const editingChannel = config.channels.find((channel) => channel.id === editingChannelId) || null;
-    useEffect(() => setActiveTab(initialTab), [initialTab]);
+    const customerMode = isCustomerMode();
+    useEffect(() => setActiveTab(customerConfigTabKeys().includes(initialTab) ? initialTab : "channels"), [initialTab]);
 
     const saveConfig = (nextConfig: AiConfig) => {
         (Object.keys(nextConfig) as Array<keyof AiConfig>).forEach((key) => updateConfig(key, nextConfig[key]));
@@ -83,7 +85,12 @@ export function AppConfigPanel({ showDoneButton = false, initialTab = "channels"
     const updateChannels = (channels: ModelChannel[]) => saveConfig(withChannels(config, channels));
 
     const addChannel = () => {
-        const channel = createModelChannel({ name: `渠道 ${config.channels.length + 1}` });
+        const apiFormat = customerMode ? (["openai", "gemini"] as const).find((format) => !config.channels.some((channel) => channel.apiFormat === format)) : undefined;
+        if (customerMode && !apiFormat) {
+            message.info("OpenAI 和 Gemini 渠道均已配置");
+            return;
+        }
+        const channel = createModelChannel({ name: customerMode ? `${apiFormat === "gemini" ? "Gemini" : "OpenAI"} 渠道` : `渠道 ${config.channels.length + 1}`, apiFormat });
         updateChannels([...config.channels, channel]);
         setEditingChannelId(channel.id);
     };
@@ -97,7 +104,7 @@ export function AppConfigPanel({ showDoneButton = false, initialTab = "channels"
     };
 
     const saveChannel = (channel: ModelChannel) => {
-        updateChannels(config.channels.map((item) => (item.id === channel.id ? channel : item)));
+        updateChannels(config.channels.map((item) => (item.id === channel.id ? customerConfigChannel(channel) : item)));
     };
 
     const testWebdav = async () => {
@@ -163,8 +170,8 @@ export function AppConfigPanel({ showDoneButton = false, initialTab = "channels"
                         children: (
                             <div>
                                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                                    <div className="text-xs text-stone-500">每个渠道选择一个协议并拉取模型，为每个模型指定能力（生图/视频/文本/音频），并可自定义调用脚本。</div>
-                                    <Button type="primary" icon={<Plus className="size-4" />} onClick={addChannel}>
+                                    <div className="text-xs text-stone-500">{customerMode ? "为 OpenAI 或 Gemini 渠道填写 API Key，并选择可用的生图或文本模型。" : "每个渠道选择一个协议并拉取模型，为每个模型指定能力（生图/视频/文本/音频），并可自定义调用脚本。"}</div>
+                                    <Button type="primary" icon={<Plus className="size-4" />} onClick={addChannel} disabled={customerMode && config.channels.length >= 2}>
                                         新增渠道
                                     </Button>
                                 </div>
@@ -174,7 +181,7 @@ export function AppConfigPanel({ showDoneButton = false, initialTab = "channels"
                                             <div className="min-w-0">
                                                 <div className="truncate text-sm font-semibold">{channel.name || "未命名渠道"}</div>
                                                 <div className="mt-1 truncate text-xs text-stone-500">
-                                                    {apiFormatLabel(channel.apiFormat)} · {channel.models.length} 个模型 · {channel.baseUrl || "未填写接口地址"}
+                                                    {apiFormatLabel(channel.apiFormat)} · {channel.models.length} 个模型{customerMode ? "" : ` · ${channel.baseUrl || "未填写接口地址"}`}
                                                 </div>
                                             </div>
                                             <div className="flex shrink-0 gap-2">
@@ -290,7 +297,7 @@ export function AppConfigPanel({ showDoneButton = false, initialTab = "channels"
                             </Form>
                         ),
                     },
-                ]}
+                ].filter((item) => customerConfigTabKeys().includes(item.key as ConfigTabKey))}
             />
             {showDoneButton ? (
                 <div className="mt-4 flex justify-end">
