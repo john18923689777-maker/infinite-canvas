@@ -3,6 +3,16 @@ type CustomerModeInputs = {
     runtime?: unknown;
 };
 
+export const CUSTOMER_MODE_DISABLED = "CUSTOMER_MODE_DISABLED";
+
+export function assertCustomerModeDisabled(): never {
+    throw new Error(CUSTOMER_MODE_DISABLED);
+}
+
+export function assertCapabilityEnabled() {
+    if (isCustomerMode()) assertCustomerModeDisabled();
+}
+
 const CUSTOMER_QUERY_KEYS = ["baseUrl", "baseurl", "apiKey", "apikey", "agentUrl", "agentToken"] as const;
 
 export type AppRouteId = "home" | "image" | "video" | "assets" | "prompts" | "canvas" | "canvas-project" | "config";

@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig } from "axios";
 
 import { buildApiUrl, type AiConfig, type ModelCapability } from "@/stores/use-config-store";
+import { assertCapabilityEnabled } from "@/lib/customer-mode";
 
 type RequestOptions = { signal?: AbortSignal };
 
@@ -111,6 +112,7 @@ function createPoll(signal?: AbortSignal) {
  * The script must `return` the result; each caller normalizes it to its capability's shape.
  */
 export async function runModelPlugin<T = unknown>(args: RunPluginArgs): Promise<T> {
+    assertCapabilityEnabled();
     const { config } = args;
     const http = createPluginHttp(config, { signal: args.signal });
     const request = createPluginRequest(config, { signal: args.signal });

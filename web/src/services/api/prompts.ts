@@ -3,6 +3,7 @@ import localforage from "localforage";
 import { runPromptSource, type RawPrompt } from "./prompt-source-runtime";
 import { usePromptSourceStore } from "@/stores/use-prompt-source-store";
 import type { PromptSource } from "./prompt-source-presets";
+import { assertCapabilityEnabled } from "@/lib/customer-mode";
 
 export type Prompt = RawPrompt & {
     category: string;
@@ -81,6 +82,7 @@ async function getAllPrompts(): Promise<Prompt[]> {
 }
 
 export async function fetchPrompts({ keyword = "", tag = [], category = ALL_PROMPTS_OPTION, page = 1, pageSize = 20 }: { keyword?: string; tag?: string[]; category?: string; page?: number; pageSize?: number } = {}) {
+    assertCapabilityEnabled();
     const items = await getAllPrompts();
     const normalizedKeyword = keyword.trim().toLowerCase();
     const normalizedPage = Math.max(1, page);
@@ -98,6 +100,7 @@ export async function fetchPrompts({ keyword = "", tag = [], category = ALL_PROM
 
 /** Load a single source's prompts (used by the source content table). Throws so the caller can show the error. */
 export async function fetchSourcePrompts(sourceId: string, force = false): Promise<Prompt[]> {
+    assertCapabilityEnabled();
     const source = usePromptSourceStore.getState().sources.find((item) => item.id === sourceId);
     if (!source) throw new Error("提示词来源不存在");
     return getSourcePrompts(source, force);
@@ -105,12 +108,14 @@ export async function fetchSourcePrompts(sourceId: string, force = false): Promi
 
 /** Force refetch one source and refresh its cache; returns the fetched count. */
 export async function refreshSource(sourceId: string): Promise<number> {
+    assertCapabilityEnabled();
     const items = await fetchSourcePrompts(sourceId, true);
     return items.length;
 }
 
 /** Force refetch every enabled source; returns the total prompt count. */
 export async function refreshAllSources(): Promise<number> {
+    assertCapabilityEnabled();
     const settled = await Promise.all(
         enabledSources().map(async (source) => {
             try {

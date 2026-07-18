@@ -2,6 +2,7 @@ import { registerNodeDefinitions, unregisterPluginNodes } from "@/lib/canvas/nod
 import { getPluginRuntime } from "@/lib/canvas/plugin-runtime";
 import { usePluginStore, type InstalledPlugin } from "@/stores/canvas/use-plugin-store";
 import type { CanvasPlugin } from "@/types/canvas-plugin";
+import { assertCapabilityEnabled, isCustomerMode } from "@/lib/customer-mode";
 
 const cleanups = new Map<string, () => void>();
 
@@ -28,6 +29,7 @@ function assertPlugin(plugin: unknown): asserts plugin is CanvasPlugin {
 }
 
 export function activatePlugin(plugin: CanvasPlugin) {
+    assertCapabilityEnabled();
     registerNodeDefinitions(plugin.nodes, plugin.id);
     const runtime = getPluginRuntime();
     const disposers: Array<() => void> = [];
@@ -59,6 +61,7 @@ function withCacheBust(url: string) {
 // bustCache=true 时下载绕过 HTTP/CDN 缓存(升级场景必需,避免拿到旧产物),
 // 但落库的 url 始终保持干净(不带 ?t=),便于后续再次更新。
 export async function installPluginFromUrl(url: string, opts?: { official?: boolean; bustCache?: boolean }) {
+    assertCapabilityEnabled();
     const source = await fetchPluginSource(opts?.bustCache ? withCacheBust(url) : url);
     const plugin = await evaluatePluginSource(source);
     deactivatePlugin(plugin.id); // 覆盖旧版本
@@ -68,11 +71,13 @@ export async function installPluginFromUrl(url: string, opts?: { official?: bool
 }
 
 export async function updatePlugin(record: InstalledPlugin) {
+    assertCapabilityEnabled();
     // 升级必须拿到最新产物,强制绕过缓存
     return installPluginFromUrl(record.url, { official: record.official, bustCache: true });
 }
 
 export async function setPluginEnabled(record: InstalledPlugin, enabled: boolean) {
+    assertCapabilityEnabled();
     usePluginStore.getState().setEnabled(record.id, enabled);
     if (!enabled) {
         deactivatePlugin(record.id);
@@ -85,6 +90,7 @@ export async function setPluginEnabled(record: InstalledPlugin, enabled: boolean
 }
 
 export function uninstallPlugin(id: string) {
+    assertCapabilityEnabled();
     deactivatePlugin(id);
     usePluginStore.getState().remove(id);
 }
@@ -93,6 +99,7 @@ let loaded = false;
 
 // 应用启动时加载已安装且启用的插件
 export async function ensurePluginsLoaded() {
+    if (isCustomerMode()) return;
     if (loaded) return;
     loaded = true;
     await usePluginStore.persist.rehydrate();

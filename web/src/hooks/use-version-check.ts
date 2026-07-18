@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { App } from "antd";
 import { APP_VERSION } from "@/constant/env";
 import { parseChangelog, type ReleaseInfo } from "@/lib/release";
+import { isCustomerMode } from "@/lib/customer-mode";
 
 const latestVersionUrl = "https://raw.githubusercontent.com/basketikun/infinite-canvas/main/VERSION";
 const latestChangelogUrl = "https://raw.githubusercontent.com/basketikun/infinite-canvas/main/CHANGELOG.md";
@@ -33,6 +34,7 @@ export function useVersionCheck() {
     const hasNewVersion = isNewerVersion(latestVersion, currentVersion);
 
     const checkLatestVersion = useCallback(async () => {
+        if (isCustomerMode()) return false;
         try {
             const response = await fetch(latestVersionUrl);
             if (!response.ok) return false;
@@ -46,6 +48,7 @@ export function useVersionCheck() {
 
     const checkLatestRelease = useCallback(
         async (showMessage = false) => {
+            if (isCustomerMode()) return false;
             setChecking(true);
             try {
                 const [versionResponse, changelogResponse] = await Promise.all([fetch(latestVersionUrl), fetch(latestChangelogUrl)]);

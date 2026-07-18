@@ -5,6 +5,7 @@
 // fork/自托管者默认零统计，官方站点仅通过环境变量注入自己的 ID（ID 不入库）。
 
 import { ANALYTICS_BAIDU_ID, ANALYTICS_GA4_ID } from "@/constant/runtime-config";
+import { isCustomerMode } from "@/lib/customer-mode";
 
 type GtagFn = (...args: unknown[]) => void;
 
@@ -49,6 +50,7 @@ function initBaidu(id: string) {
 }
 
 export function initAnalytics() {
+    if (isCustomerMode()) return;
     if (initialized || typeof window === "undefined") return;
     initialized = true;
 
@@ -71,6 +73,7 @@ export function initAnalytics() {
 
 // SPA 路由切换时上报页面浏览，分发给所有已启用的统计。
 export function trackPageview(path: string) {
+    if (isCustomerMode()) return;
     try {
         if (active.ga4 && window.gtag) {
             window.gtag("event", "page_view", { page_path: path, page_location: window.location.href });
@@ -82,4 +85,3 @@ export function trackPageview(path: string) {
         /* 忽略 */
     }
 }
-

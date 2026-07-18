@@ -1,10 +1,12 @@
 import type { WebdavSyncConfig } from "@/stores/use-config-store";
+import { assertCapabilityEnabled } from "@/lib/customer-mode";
 
 export const WEBDAV_MANIFEST_FILE_NAME = "manifest.json";
 const WEBDAV_REQUEST_TIMEOUT_MS = 120000;
 const ensuredDirectories = new Set<string>();
 
 export async function testWebdavConnection(config: WebdavSyncConfig) {
+    assertCapabilityEnabled();
     await ensureWebdavDirectory(config);
     const response = await webdavFetch(config, "", { method: "PROPFIND", headers: { Depth: "0" } });
     if (response.ok || response.status === 207) return;
@@ -16,6 +18,7 @@ export async function downloadWebdavSyncFile(config: WebdavSyncConfig) {
 }
 
 export async function downloadWebdavFile(config: WebdavSyncConfig, path: string) {
+    assertCapabilityEnabled();
     await ensureWebdavDirectory(config);
     const response = await webdavFetch(config, path, { method: "GET" });
     if (response.status === 404) return null;
@@ -29,6 +32,7 @@ export async function uploadWebdavSyncFile(config: WebdavSyncConfig, file: Blob)
 }
 
 export async function uploadWebdavFile(config: WebdavSyncConfig, path: string, file: Blob, contentType = "application/octet-stream") {
+    assertCapabilityEnabled();
     if (!file.size) throw new Error("上传文件为空，已取消上传");
     await ensureWebdavDirectory(config);
     await ensureWebdavSubdirectory(config, path);

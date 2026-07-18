@@ -7,9 +7,10 @@ import { RouterProvider } from "react-router-dom";
 
 import { AppProviders } from "@/components/layout/app-providers";
 import { initAnalytics } from "@/lib/analytics";
+import { isCustomerMode } from "@/lib/customer-mode";
 import { router } from "@/router";
 
-initAnalytics();
+if (!isCustomerMode()) initAnalytics();
 
 document.body.style.fontFamily = '"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei","Helvetica Neue",sans-serif';
 

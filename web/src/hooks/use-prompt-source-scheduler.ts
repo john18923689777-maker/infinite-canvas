@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { refreshAllSources } from "@/services/api/prompts";
 import { usePromptSourceStore } from "@/stores/use-prompt-source-store";
+import { isCustomerMode } from "@/lib/customer-mode";
 
 const CHECK_INTERVAL_MS = 60_000;
 
@@ -12,6 +13,7 @@ export function usePromptSourceScheduler() {
     const intervalMinutes = usePromptSourceStore((state) => state.schedule.intervalMinutes);
 
     useEffect(() => {
+        if (isCustomerMode()) return;
         if (!intervalMinutes) return;
         let running = false;
         const tick = async () => {

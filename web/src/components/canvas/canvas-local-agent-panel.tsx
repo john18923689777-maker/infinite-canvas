@@ -5,6 +5,7 @@ import copyToClipboard from "copy-to-clipboard";
 import { Copy, FolderOpen, History, KeyRound, Link2, LoaderCircle, PlugZap, Plus, RefreshCw, Square, Terminal, Trash2 } from "lucide-react";
 
 import { canvasThemes } from "@/lib/canvas-theme";
+import { isCustomerMode, CUSTOMER_MODE_DISABLED } from "@/lib/customer-mode";
 import { randomId } from "@/lib/utils";
 import { useThemeStore } from "@/stores/use-theme-store";
 import { useUserStore } from "@/stores/use-user-store";
@@ -140,6 +141,7 @@ export function CanvasLocalAgentPanel({ embedded, headless, autoConnect }: { emb
     useEffect(() => () => attachmentUrlsRef.current.forEach((url) => URL.revokeObjectURL(url)), []);
 
     useEffect(() => {
+        if (isCustomerMode()) return;
         if (!enabled || !token.trim()) return;
         localStorage.setItem("canvas-agent-url", endpoint);
         localStorage.setItem("canvas-agent-token", token);
@@ -201,6 +203,7 @@ export function CanvasLocalAgentPanel({ embedded, headless, autoConnect }: { emb
     }, [connected, loadThreads]);
 
     const sendPrompt = async () => {
+        if (isCustomerMode()) return;
         const text = prompt.trim();
         const files = attachments;
         const requestPrompt = promptWithAttachments(text, files);
@@ -237,6 +240,7 @@ export function CanvasLocalAgentPanel({ embedded, headless, autoConnect }: { emb
     };
 
     const stopTurn = async () => {
+        if (isCustomerMode()) return;
         if (!connected || (!sending && !waiting)) return;
         setAgentState({ activity: "停止中" });
         try {
@@ -371,6 +375,10 @@ export function CanvasLocalAgentPanel({ embedded, headless, autoConnect }: { emb
     };
 
     const toggleAgentConnection = async ({ silent = false }: { silent?: boolean } = {}) => {
+        if (isCustomerMode()) {
+            setAgentState({ enabled: false, connected: false, connectError: CUSTOMER_MODE_DISABLED, activity: "离线" });
+            return;
+        }
         if (enabled) {
             clearAgentSession({ enabled: false, connected: false, activity: "离线", connectError: "" });
             return;
@@ -946,6 +954,7 @@ function AgentHistoryView({
 }
 
 async function postState(endpoint: string, token: string, clientId: string, snapshot: CanvasAgentSnapshot | null) {
+    if (isCustomerMode()) return;
     try {
         await fetch(`${endpoint}/canvas/state?token=${encodeURIComponent(token)}&clientId=${encodeURIComponent(clientId)}`, {
             method: "POST",
@@ -956,6 +965,7 @@ async function postState(endpoint: string, token: string, clientId: string, snap
 }
 
 async function postToolResult(endpoint: string, token: string, clientId: string, body: { requestId: string; result?: unknown; error?: string }) {
+    if (isCustomerMode()) return;
     await fetch(`${endpoint}/canvas/result?token=${encodeURIComponent(token)}&clientId=${encodeURIComponent(clientId)}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
 }
 
@@ -1181,6 +1191,7 @@ function formatBytes(bytes: number) {
 }
 
 async function fetchAgentJson<T>(endpoint: string, token: string, path: string, init?: RequestInit) {
+    if (isCustomerMode()) throw new Error(CUSTOMER_MODE_DISABLED);
     const url = `${endpoint}${path}${path.includes("?") ? "&" : "?"}token=${encodeURIComponent(token)}`;
     const res = await fetch(url, init);
     const data = (await res.json().catch(() => ({}))) as T & { error?: string; msg?: string };
@@ -1189,6 +1200,7 @@ async function fetchAgentJson<T>(endpoint: string, token: string, path: string, 
 }
 
 async function discoverAgentConfig(endpoint: string) {
+    if (isCustomerMode()) return null;
     try {
         const res = await fetch(`${endpoint}/config`);
         if (!res.ok) return null;

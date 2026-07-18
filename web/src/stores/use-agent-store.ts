@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import type { CanvasAgentOp, CanvasAgentSnapshot } from "@/lib/canvas/canvas-agent-ops";
+import { isCustomerMode, CUSTOMER_MODE_DISABLED } from "@/lib/customer-mode";
 
 export type AgentChatRole = "user" | "assistant" | "system" | "tool" | "error";
 export type AgentAttachment = { id: string; name: string; type: string; size: number; url: string; dataUrl: string };
@@ -93,6 +94,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
     togglePanel: () => (get().panelOpen ? get().closePanel() : get().openPanel()),
     setCanvasContext: (canvasContext) => set({ canvasContext }),
     connectAgent: (options) => {
+        if (isCustomerMode()) return set({ enabled: false, connected: false, connectError: CUSTOMER_MODE_DISABLED, activity: "离线" });
         const silent = options?.silent ?? false;
         const endpoint = get().url.trim().replace(/\/$/, "");
         const token = get().token.trim();
