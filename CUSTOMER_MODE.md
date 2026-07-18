@@ -2,19 +2,17 @@
 
 This repository is a customer-oriented fork of [basketikun/infinite-canvas](https://github.com/basketikun/infinite-canvas), licensed under the upstream [GNU Affero General Public License v3.0](LICENSE).
 
-## Immutable upstream source
+## Baseline provenance
 
 - Upstream repository: `https://github.com/basketikun/infinite-canvas`
-- `SOURCE_COMMIT`: `bdca6b0a5c193b8c85dfbf7c6a433d62f02da9df`
-- Source offer URL: `https://github.com/basketikun/infinite-canvas/tree/bdca6b0a5c193b8c85dfbf7c6a433d62f02da9df`
+- Upstream attribution commit: `bdca6b0a5c193b8c85dfbf7c6a433d62f02da9df`
+- Local customer-fork baseline commit: `66922a8ba02f5f6bc0396d6862c7b78f39b921a2`
 
-Release artifacts must derive their source offer URL deterministically as:
+This local baseline is not a release and is not a public source offer. The upstream attribution commit identifies the starting point only; it does not identify this modified fork's source.
 
-```text
-https://github.com/basketikun/infinite-canvas/tree/${SOURCE_COMMIT}
-```
+## Release source-offer gate
 
-`SOURCE_COMMIT` is immutable for a release and must name a commit that exists in the upstream repository. Release artifacts must resolve this template to a real commit URL; placeholders such as `${SOURCE_COMMIT}`, `<commit>`, or a branch URL are not acceptable source offers.
+Before any customer release is published or distributed, the release authority must supply and record the exact canonical public URL for the corresponding commit in this fork. That literal public fork-commit URL is the release's source offer and must resolve to the released commit. No release artifact may be created until that URL is available and verified.
 
 ## Customer-mode policy
 
