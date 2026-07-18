@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+: "${AFFECTED_INSTANCE:?set AFFECTED_INSTANCE}"
+: "${A_SETTINGS_JSON:?set A_SETTINGS_JSON}"
+: "${B_SETTINGS_JSON:?set B_SETTINGS_JSON}"
+: "${A_COMPOSE_FILE:?set A_COMPOSE_FILE}"
+: "${B_COMPOSE_FILE:?set B_COMPOSE_FILE}"
+: "${A_VHOST_FILE:?set A_VHOST_FILE}"
+: "${B_VHOST_FILE:?set B_VHOST_FILE}"
+: "${A_PROVENANCE_FILE:?set A_PROVENANCE_FILE}"
+: "${B_PROVENANCE_FILE:?set B_PROVENANCE_FILE}"
+: "${SNAPSHOT_DIR:?set SNAPSHOT_DIR}"
+
+mkdir -p "$SNAPSHOT_DIR"
+hashes="$SNAPSHOT_DIR/rollback-${AFFECTED_INSTANCE}.sha256"
+sha256sum "$A_SETTINGS_JSON" "$B_SETTINGS_JSON" "$A_COMPOSE_FILE" "$B_COMPOSE_FILE" "$A_VHOST_FILE" "$B_VHOST_FILE" "$A_PROVENANCE_FILE" "$B_PROVENANCE_FILE" >"$hashes"
+grep -q "$(sha256sum "$B_SETTINGS_JSON" | awk '{print $1}')  $B_SETTINGS_JSON" "$hashes"
+grep -q "$(sha256sum "$B_COMPOSE_FILE" | awk '{print $1}')  $B_COMPOSE_FILE" "$hashes"
+grep -q "$(sha256sum "$B_VHOST_FILE" | awk '{print $1}')  $B_VHOST_FILE" "$hashes"
+grep -q "$(sha256sum "$B_PROVENANCE_FILE" | awk '{print $1}')  $B_PROVENANCE_FILE" "$hashes"
+echo "PASS rollback isolated affected=$AFFECTED_INSTANCE"
