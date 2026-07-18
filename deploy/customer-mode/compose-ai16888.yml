@@ -1,0 +1,14 @@
+services:
+  infinite-canvas-ai16888:
+    image: infinite-canvas-sub2-customer:ai16888-ee351ee
+    container_name: infinite-canvas-ai16888
+    restart: unless-stopped
+    env_file:
+      - ./env/ai16888.env
+    ports:
+      - "127.0.0.1:3312:3000"
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "10"

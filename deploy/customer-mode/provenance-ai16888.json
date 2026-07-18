@@ -1,0 +1,15 @@
+{
+  "instance": "ai16888",
+  "domain": "canvas.ai16888.com.cn",
+  "parent_domain": "sub2.ai16888.com.cn",
+  "compose_file": "compose-ai16888.yml",
+  "env_file": "env/ai16888.env",
+  "vhost_file": "canvas-ai16888.conf",
+  "image_tag": "infinite-canvas-sub2-customer:ai16888-ee351ee",
+  "image_digest": "pending-build",
+  "source_commit": "ee351ee",
+  "source_url": "",
+  "proxy_revision": "323152d",
+  "release_timestamp": "pending-build",
+  "status": "staging-artifact-pending-image-build"
+}

@@ -1,0 +1,14 @@
+services:
+  infinite-canvas-55ai:
+    image: infinite-canvas-sub2-customer:55ai-ee351ee
+    container_name: infinite-canvas-55ai
+    restart: unless-stopped
+    env_file:
+      - ./env/55ai.env
+    ports:
+      - "127.0.0.1:3311:3000"
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "10"
