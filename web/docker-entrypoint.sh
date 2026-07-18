@@ -11,11 +11,17 @@ sanitize_id() {
     printf '%s' "$1" | tr -cd 'A-Za-z0-9-'
 }
 
+sanitize_bool() {
+    [ "$1" = "true" ] && printf 'true' || printf 'false'
+}
+
 GA4_ID=$(sanitize_id "${ANALYTICS_GA4_ID:-}")
 BAIDU_ID=$(sanitize_id "${ANALYTICS_BAIDU_ID:-}")
+CUSTOMER_MODE=$(sanitize_bool "${CUSTOMER_MODE:-}")
 
 cat > /usr/share/nginx/html/config.js <<EOF
 window.__RUNTIME_CONFIG__ = {
+  CUSTOMER_MODE: ${CUSTOMER_MODE},
   ANALYTICS_GA4_ID: "${GA4_ID}",
   ANALYTICS_BAIDU_ID: "${BAIDU_ID}"
 };

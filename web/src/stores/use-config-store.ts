@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 
-import { canUseExternalBaseUrl, customerGeminiBaseUrl, customerOpenAIBaseUrl, isCustomerMode } from "@/lib/customer-mode";
+import { customerGeminiBaseUrl, customerOpenAIBaseUrl, isCustomerMode } from "@/lib/customer-mode";
 
 export type ApiCallFormat = "openai" | "gemini";
 export type ModelCapability = "image" | "video" | "text" | "audio";
@@ -366,7 +366,7 @@ export function defaultBaseUrlForApiFormat(apiFormat: ApiCallFormat) {
 function normalizeBaseUrl(baseUrl: string | undefined, apiFormat: ApiCallFormat) {
     const value = (baseUrl || "").trim();
     if (!value) return defaultBaseUrlForApiFormat(apiFormat);
-    return isCustomerMode() && !canUseExternalBaseUrl(value) ? defaultBaseUrlForApiFormat(apiFormat) : value;
+    return isCustomerMode() ? defaultBaseUrlForApiFormat(apiFormat) : value;
 }
 
 function normalizeChannelsForCustomer(channels: ModelChannel[]) {

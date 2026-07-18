@@ -30,12 +30,14 @@ export function customerGeminiBaseUrl() {
     return currentOrigin();
 }
 
+/** Customer mode permits only the current scheme/host/port at the root path; callers canonicalize it to window.location.origin. */
 export function canUseExternalBaseUrl(baseUrl: string) {
     if (!isCustomerMode()) return true;
     const origin = currentOrigin();
     if (!origin) return false;
     try {
-        return new URL(baseUrl || origin, origin).origin === origin;
+        const parsed = new URL(baseUrl || origin, origin);
+        return parsed.origin === origin && !parsed.username && !parsed.password && !parsed.search && !parsed.hash && (parsed.pathname === "" || parsed.pathname === "/");
     } catch {
         return false;
     }

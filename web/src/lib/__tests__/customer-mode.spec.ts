@@ -78,8 +78,19 @@ describe("browser customer-mode policy", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         expect(customerOpenAIBaseUrl()).toBe(window.location.origin);
         expect(customerGeminiBaseUrl()).toBe(window.location.origin);
-        expect(canUseExternalBaseUrl("https://other.example")).toBe(false);
         expect(canUseExternalBaseUrl(window.location.origin)).toBe(true);
+        expect(canUseExternalBaseUrl(`${window.location.origin}/`)).toBe(true);
+    });
+
+    it.each([
+        ["non-root path", () => `${window.location.origin}/v1`],
+        ["query string", () => `${window.location.origin}?apiKey=secret`],
+        ["hash", () => `${window.location.origin}#hash`],
+        ["credentials", () => window.location.origin.replace("://", "://user:pass@")],
+        ["external origin", () => "https://other.example"],
+    ])("rejects a customer Base URL with %s", (_case, baseUrl) => {
+        vi.stubEnv("VITE_CUSTOMER_MODE", "true");
+        expect(canUseExternalBaseUrl(baseUrl())).toBe(false);
     });
 
     it("disables API and Agent imports in customer mode", () => {
