@@ -3,6 +3,7 @@ import { ListPlus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { defaultBaseUrlForApiFormat, guessCapability, normalizeChannelModels, type ApiCallFormat, type ChannelModel, type ModelCapability, type ModelChannel } from "@/stores/use-config-store";
+import { customerConfigCapabilityAllowed, customerConfigChannel, isCustomerMode } from "@/lib/customer-mode";
 import { ModelScriptEditor } from "./model-script-editor";
 import { ModelSelectModal } from "./model-select-modal";
 
@@ -26,7 +27,7 @@ export function ChannelEditorDrawer({ open, channel, onSave, onClose }: { open: 
     const [scriptTarget, setScriptTarget] = useState<ScriptTarget | null>(null);
 
     useEffect(() => {
-        if (open && channel) setDraft(channel);
+        if (open && channel) setDraft(customerConfigChannel(channel));
     }, [open, channel]);
 
     if (!draft) return null;
@@ -41,15 +42,18 @@ export function ChannelEditorDrawer({ open, channel, onSave, onClose }: { open: 
 
     const applySelection = (names: string[]) => {
         const map = new Map(draft.models.map((model) => [model.name, model]));
-        setModels(names.map((name) => map.get(name) || { name, capability: guessCapability(name) }));
+        setModels(names.map((name) => map.get(name) || { name, capability: guessCapability(name) }).filter((model) => customerConfigCapabilityAllowed(model.capability)));
     };
 
-    const setCapability = (name: string, capability: ModelCapability) => setModels(draft.models.map((model) => (model.name === name ? { ...model, capability } : model)));
+    const setCapability = (name: string, capability: ModelCapability) => {
+        if (!customerConfigCapabilityAllowed(capability)) return;
+        setModels(draft.models.map((model) => (model.name === name ? { ...model, capability } : model)));
+    };
     const setScript = (name: string, script: string) => setModels(draft.models.map((model) => (model.name === name ? { ...model, script: script || undefined } : model)));
     const removeModel = (name: string) => setModels(draft.models.filter((model) => model.name !== name));
 
     const save = () => {
-        onSave({ ...draft, name: draft.name.trim() || "未命名渠道", models: normalizeChannelModels(draft.models) });
+        onSave(customerConfigChannel({ ...draft, name: draft.name.trim() || "未命名渠道", models: normalizeChannelModels(draft.models) }));
         onClose();
     };
 
@@ -76,9 +80,9 @@ export function ChannelEditorDrawer({ open, channel, onSave, onClose }: { open: 
                 </label>
                 <label className="block">
                     <span className="mb-1 block text-sm font-medium">协议</span>
-                    <Select className="w-full" value={draft.apiFormat} options={apiFormatOptions} onChange={changeApiFormat} />
+                    <Select className="w-full" value={draft.apiFormat} options={apiFormatOptions} onChange={changeApiFormat} disabled={isCustomerMode()} />
                 </label>
-                <label className="block md:col-span-2">
+                <label className={`block md:col-span-2 ${isCustomerMode() ? "hidden" : ""}`}>
                     <span className="mb-1 block text-sm font-medium">接口地址</span>
                     <Input value={draft.baseUrl} onChange={(event) => patch({ baseUrl: event.target.value })} placeholder="https://api.example.com" />
                 </label>
@@ -106,10 +110,10 @@ export function ChannelEditorDrawer({ open, channel, onSave, onClose }: { open: 
                                 {model.name}
                             </span>
                             <div className="flex shrink-0 items-center gap-2">
-                                <Segmented size="small" value={model.capability} options={capabilityOptions} onChange={(value) => setCapability(model.name, value as ModelCapability)} />
-                                <Button size="small" type={model.script ? "primary" : "default"} ghost={Boolean(model.script)} onClick={() => setScriptTarget({ name: model.name, capability: model.capability, value: model.script || "" })}>
+                                <Segmented size="small" value={model.capability} options={capabilityOptions.filter((option) => customerConfigCapabilityAllowed(option.value))} onChange={(value) => setCapability(model.name, value as ModelCapability)} />
+                                {!isCustomerMode() ? <Button size="small" type={model.script ? "primary" : "default"} ghost={Boolean(model.script)} onClick={() => setScriptTarget({ name: model.name, capability: model.capability, value: model.script || "" })}>
                                     {model.script ? "脚本已设" : "调用脚本"}
-                                </Button>
+                                </Button> : null}
                                 <Button size="small" danger type="text" icon={<Trash2 className="size-3.5" />} onClick={() => removeModel(model.name)} />
                             </div>
                         </div>

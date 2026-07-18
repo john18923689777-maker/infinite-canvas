@@ -183,12 +183,13 @@ export const useConfigStore = create<ConfigStore>()(
             configTab: "channels",
             shouldPromptContinue: false,
             updateConfig: (key, value) =>
-                set((state) => ({
-                    config: {
+                set((state) => {
+                    const next = {
                         ...state.config,
                         [key]: key === "baseUrl" ? normalizeBaseUrl(String(value), state.config.apiFormat) : key === "channels" ? normalizeChannelsForCustomer(value as ModelChannel[]) : value,
-                    },
-                })),
+                    } as AiConfig;
+                    return { config: normalizeCustomerConfig(next) };
+                }),
             updateWebdavConfig: (key, value) =>
                 set((state) => ({
                     webdav: {
@@ -212,30 +213,31 @@ export const useConfigStore = create<ConfigStore>()(
                 if (!Array.isArray(persistedConfig.channels)) config.channels = [];
                 const channels = normalizeChannels(config);
                 const models = modelOptionsFromChannels(channels);
+                const mergedConfig = normalizeCustomerConfig({
+                    ...config,
+                    baseUrl: normalizeBaseUrl(config.baseUrl, config.apiFormat),
+                    channelMode: "local",
+                    apiFormat: normalizeApiFormat(config.apiFormat),
+                    channels,
+                    models,
+                    imageModel: normalizeModelOptionValue(config.imageModel || config.model, channels),
+                    videoModel: normalizeModelOptionValue(config.videoModel, channels),
+                    textModel: normalizeModelOptionValue(config.textModel || config.model, channels),
+                    audioModel: normalizeModelOptionValue(config.audioModel || defaultConfig.audioModel, channels),
+                    audioVoice: config.audioVoice || defaultConfig.audioVoice,
+                    audioFormat: config.audioFormat || defaultConfig.audioFormat,
+                    audioSpeed: config.audioSpeed || defaultConfig.audioSpeed,
+                    audioInstructions: config.audioInstructions || "",
+                    videoSeconds: config.videoSeconds || "6",
+                    vquality: config.vquality || "720",
+                    videoGenerateAudio: config.videoGenerateAudio || "true",
+                    videoWatermark: config.videoWatermark || "false",
+                    canvasImageCount: config.canvasImageCount || "3",
+                });
                 return {
                     ...current,
                     webdav: { ...defaultWebdavSyncConfig, ...persistedWebdav },
-                    config: {
-                        ...config,
-                        baseUrl: normalizeBaseUrl(config.baseUrl, config.apiFormat),
-                        channelMode: "local",
-                        apiFormat: normalizeApiFormat(config.apiFormat),
-                        channels,
-                        models,
-                        imageModel: normalizeModelOptionValue(config.imageModel || config.model, channels),
-                        videoModel: normalizeModelOptionValue(config.videoModel, channels),
-                        textModel: normalizeModelOptionValue(config.textModel || config.model, channels),
-                        audioModel: normalizeModelOptionValue(config.audioModel || defaultConfig.audioModel, channels),
-                        audioVoice: config.audioVoice || defaultConfig.audioVoice,
-                        audioFormat: config.audioFormat || defaultConfig.audioFormat,
-                        audioSpeed: config.audioSpeed || defaultConfig.audioSpeed,
-                        audioInstructions: config.audioInstructions || "",
-                        videoSeconds: config.videoSeconds || "6",
-                        vquality: config.vquality || "720",
-                        videoGenerateAudio: config.videoGenerateAudio || "true",
-                        videoWatermark: config.videoWatermark || "false",
-                        canvasImageCount: config.canvasImageCount || "3",
-                    },
+                    config: mergedConfig,
                 };
             },
         },
@@ -356,6 +358,30 @@ function normalizeChannels(config: AiConfig) {
         );
     }
     return normalizeChannelsForCustomer(channels);
+}
+
+function normalizeCustomerConfig(config: AiConfig): AiConfig {
+    if (!isCustomerMode()) return config;
+    const channels = normalizeChannelsForCustomer(config.channels);
+    const imageOptions = selectableModelsByCapability({ ...config, channels }, "image");
+    const textOptions = selectableModelsByCapability({ ...config, channels }, "text");
+    const normalizeAllowed = (value: string, options: string[]) => {
+        const normalized = normalizeModelOptionValue(value, channels);
+        return normalized && options.includes(normalized) ? normalized : options[0] || "";
+    };
+    const model = normalizeAllowed(config.model, [...imageOptions, ...textOptions]);
+    return {
+        ...config,
+        channelMode: "local",
+        channels,
+        models: modelOptionsFromChannels(channels),
+        baseUrl: normalizeBaseUrl(config.baseUrl, config.apiFormat),
+        imageModel: normalizeAllowed(config.imageModel || model, imageOptions),
+        textModel: normalizeAllowed(config.textModel || model, textOptions),
+        model,
+        videoModel: "",
+        audioModel: "",
+    };
 }
 
 export function defaultBaseUrlForApiFormat(apiFormat: ApiCallFormat) {
