@@ -6,6 +6,7 @@
 // 仅支持 GA4 与百度：两者都只接受 ID，脚本地址由代码固定拼接，不接受任意脚本/内联 JS。
 
 type RuntimeConfig = {
+    CUSTOMER_MODE?: boolean | string;
     ANALYTICS_GA4_ID?: string; // GA4 衡量 ID（G-XXXX）
     ANALYTICS_BAIDU_ID?: string; // 百度统计站点 ID
 };
@@ -27,4 +28,3 @@ function read(key: keyof RuntimeConfig, buildTime: string | undefined, fallback 
 
 export const ANALYTICS_GA4_ID = read("ANALYTICS_GA4_ID", import.meta.env.VITE_ANALYTICS_GA4_ID);
 export const ANALYTICS_BAIDU_ID = read("ANALYTICS_BAIDU_ID", import.meta.env.VITE_ANALYTICS_BAIDU_ID);
-

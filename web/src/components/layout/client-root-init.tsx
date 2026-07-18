@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { App } from "antd";
 
+import { canImportApiConfig, isCustomerMode, stripCustomerModeQueryParams } from "@/lib/customer-mode";
 import { createModelChannel, useConfigStore } from "@/stores/use-config-store";
 import { usePromptSourceScheduler } from "@/hooks/use-prompt-source-scheduler";
 
@@ -17,6 +18,14 @@ export function ClientRootInit({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (handledConfigParams.current) return;
         const searchParams = new URLSearchParams(window.location.search);
+        if (isCustomerMode()) {
+            const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+            const cleanedUrl = stripCustomerModeQueryParams(currentUrl);
+            if (cleanedUrl !== currentUrl) window.history.replaceState(null, "", cleanedUrl);
+            handledConfigParams.current = true;
+            return;
+        }
+        if (!canImportApiConfig()) return;
         const baseUrl = searchParams.get("baseUrl") || searchParams.get("baseurl");
         const apiKey = searchParams.get("apiKey") || searchParams.get("apikey");
         if (!baseUrl && !apiKey) return;

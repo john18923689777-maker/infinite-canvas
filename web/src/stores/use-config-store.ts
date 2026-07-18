@@ -3,6 +3,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 
+import { canUseExternalBaseUrl, customerGeminiBaseUrl, customerOpenAIBaseUrl, isCustomerMode } from "@/lib/customer-mode";
+
 export type ApiCallFormat = "openai" | "gemini";
 export type ModelCapability = "image" | "video" | "text" | "audio";
 
@@ -65,14 +67,14 @@ const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com";
 
 export const defaultConfig: AiConfig = {
     channelMode: "local",
-    baseUrl: OPENAI_BASE_URL,
+    baseUrl: defaultBaseUrlForApiFormat("openai"),
     apiKey: "",
     apiFormat: "openai",
     channels: [
         {
             id: "default",
             name: "默认渠道",
-            baseUrl: OPENAI_BASE_URL,
+            baseUrl: defaultBaseUrlForApiFormat("openai"),
             apiKey: "",
             apiFormat: "openai",
             models: [
@@ -184,7 +186,7 @@ export const useConfigStore = create<ConfigStore>()(
                 set((state) => ({
                     config: {
                         ...state.config,
-                        [key]: value,
+                        [key]: key === "baseUrl" ? normalizeBaseUrl(String(value), state.config.apiFormat) : key === "channels" ? normalizeChannelsForCustomer(value as ModelChannel[]) : value,
                     },
                 })),
             updateWebdavConfig: (key, value) =>
@@ -215,6 +217,7 @@ export const useConfigStore = create<ConfigStore>()(
                     webdav: { ...defaultWebdavSyncConfig, ...persistedWebdav },
                     config: {
                         ...config,
+                        baseUrl: normalizeBaseUrl(config.baseUrl, config.apiFormat),
                         channelMode: "local",
                         apiFormat: normalizeApiFormat(config.apiFormat),
                         channels,
@@ -264,7 +267,7 @@ export function createModelChannel(channel?: Partial<ModelChannel>): ModelChanne
     return {
         id: channel?.id?.trim() || nanoid(),
         name: channel?.name?.trim() || "新渠道",
-        baseUrl: channel?.baseUrl?.trim() || defaultBaseUrlForApiFormat(apiFormat),
+        baseUrl: normalizeBaseUrl(channel?.baseUrl, apiFormat),
         apiKey: channel?.apiKey || "",
         apiFormat,
         models: normalizeChannelModels(channel?.models),
@@ -324,7 +327,7 @@ export function resolveModelRequestConfig(config: AiConfig, value: string) {
     return {
         ...config,
         model: modelOptionName(value || config.model),
-        baseUrl: channel.baseUrl,
+        baseUrl: normalizeBaseUrl(channel.baseUrl, channel.apiFormat),
         apiKey: channel.apiKey,
         apiFormat: channel.apiFormat,
     };
@@ -356,7 +359,18 @@ function normalizeChannels(config: AiConfig) {
 }
 
 export function defaultBaseUrlForApiFormat(apiFormat: ApiCallFormat) {
+    if (isCustomerMode()) return apiFormat === "gemini" ? customerGeminiBaseUrl() : customerOpenAIBaseUrl();
     return apiFormat === "gemini" ? GEMINI_BASE_URL : OPENAI_BASE_URL;
+}
+
+function normalizeBaseUrl(baseUrl: string | undefined, apiFormat: ApiCallFormat) {
+    const value = (baseUrl || "").trim();
+    if (!value) return defaultBaseUrlForApiFormat(apiFormat);
+    return isCustomerMode() && !canUseExternalBaseUrl(value) ? defaultBaseUrlForApiFormat(apiFormat) : value;
+}
+
+function normalizeChannelsForCustomer(channels: ModelChannel[]) {
+    return (Array.isArray(channels) ? channels : []).map((channel) => ({ ...channel, baseUrl: normalizeBaseUrl(channel.baseUrl, channel.apiFormat) }));
 }
 
 function normalizeApiFormat(apiFormat: unknown): ApiCallFormat {
