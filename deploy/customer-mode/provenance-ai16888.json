@@ -12,5 +12,5 @@
   "proxy_revision": "ac383eb",
   "image_build_timestamp": "2026-07-19T04:33:53Z",
   "release_timestamp": "2026-07-19T13:28:54Z",
-  "status": "production-running-pending-public-source-and-full-image-acceptance"
+  "status": "production-running-pending-public-source-and-image-upstream-configuration"
 }
