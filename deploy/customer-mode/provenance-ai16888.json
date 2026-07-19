@@ -9,8 +9,8 @@
   "image_digest": "sha256:03b284dcba12dd1719f55788802001a3f401a224c10edb12441ef40cdbf91ce1",
   "source_commit": "8f4f09b",
   "source_url": "https://github.com/john18923689777-maker/infinite-canvas/commit/8f4f09b",
-  "proxy_revision": "388415d",
+  "proxy_revision": "7cfcb30",
   "image_build_timestamp": "2026-07-19T04:33:53Z",
-  "release_timestamp": "pending-build",
-  "status": "candidate-built-pending-public-source-dns-tls-and-rollout"
+  "release_timestamp": "2026-07-19T13:28:54Z",
+  "status": "production-running-pending-public-source-and-full-image-acceptance"
 }
