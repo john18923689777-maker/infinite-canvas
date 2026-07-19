@@ -32,6 +32,11 @@ afterEach(() => {
 });
 
 describe("Docker runtime customer mode", () => {
+    it("installs the exact locked dependency graph", () => {
+        const dockerfile = readFileSync(resolve(process.cwd(), "../Dockerfile"), "utf8");
+        expect(dockerfile).toContain("bun install --frozen-lockfile");
+    });
+
     it("emits exact true as a JavaScript boolean", () => {
         expect(generateRuntimeConfig("true").config).toContain("CUSTOMER_MODE: true");
     });
