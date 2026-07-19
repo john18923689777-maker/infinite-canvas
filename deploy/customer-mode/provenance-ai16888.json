@@ -5,11 +5,11 @@
   "compose_file": "compose-ai16888.yml",
   "env_file": "env/ai16888.env",
   "vhost_file": "canvas-ai16888.conf",
-  "image_tag": "infinite-canvas-sub2-customer:ai16888-ee351ee",
+  "image_tag": "infinite-canvas-sub2-customer:ai16888-388415d",
   "image_digest": "pending-build",
-  "source_commit": "ee351ee",
+  "source_commit": "388415d",
   "source_url": "",
-  "proxy_revision": "323152d",
+  "proxy_revision": "388415d",
   "release_timestamp": "pending-build",
-  "status": "staging-artifact-pending-image-build"
+  "status": "release-blocked-pending-public-source-and-image-build"
 }
