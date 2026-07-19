@@ -24,8 +24,8 @@ check_env() {
   ! grep -Eiq '(api[_-]?key|authorization|password|secret|token)\s*=' "$DIR/env/$file"
 }
 
-check_file compose-55ai.yml infinite-canvas-55ai 3311 55ai.env infinite-canvas-sub2-customer:55ai-c85805a
-check_file compose-ai16888.yml infinite-canvas-ai16888 3312 ai16888.env infinite-canvas-sub2-customer:ai16888-c85805a
-check_env 55ai.env 55ai infinite-canvas-sub2-customer:55ai-c85805a
-check_env ai16888.env ai16888 infinite-canvas-sub2-customer:ai16888-c85805a
+check_file compose-55ai.yml infinite-canvas-55ai 3311 55ai.env infinite-canvas-sub2-customer:55ai-8f4f09b
+check_file compose-ai16888.yml infinite-canvas-ai16888 3312 ai16888.env infinite-canvas-sub2-customer:ai16888-8f4f09b
+check_env 55ai.env 55ai infinite-canvas-sub2-customer:55ai-8f4f09b
+check_env ai16888.env ai16888 infinite-canvas-sub2-customer:ai16888-8f4f09b
 cmp -s "$DIR/env/55ai.env" "$DIR/env/ai16888.env" && { echo "FAIL env files must differ" >&2; exit 1; } || true
