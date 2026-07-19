@@ -30,6 +30,7 @@ BUILD_TIMESTAMP=$(sanitize_text "${BUILD_TIMESTAMP:-unknown}")
 cat > /usr/share/nginx/html/config.js <<EOF
 window.__RUNTIME_CONFIG__ = {
   CUSTOMER_MODE: ${CUSTOMER_MODE},
+  SOURCE_URL: "${SOURCE_URL}",
   ANALYTICS_GA4_ID: "${GA4_ID}",
   ANALYTICS_BAIDU_ID: "${BAIDU_ID}"
 };

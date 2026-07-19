@@ -7,6 +7,7 @@
 
 type RuntimeConfig = {
     CUSTOMER_MODE?: boolean | string;
+    SOURCE_URL?: string;
     ANALYTICS_GA4_ID?: string; // GA4 衡量 ID（G-XXXX）
     ANALYTICS_BAIDU_ID?: string; // 百度统计站点 ID
 };
@@ -28,3 +29,4 @@ function read(key: keyof RuntimeConfig, buildTime: string | undefined, fallback 
 
 export const ANALYTICS_GA4_ID = read("ANALYTICS_GA4_ID", import.meta.env.VITE_ANALYTICS_GA4_ID);
 export const ANALYTICS_BAIDU_ID = read("ANALYTICS_BAIDU_ID", import.meta.env.VITE_ANALYTICS_BAIDU_ID);
+export const SOURCE_URL = read("SOURCE_URL", import.meta.env.VITE_SOURCE_URL);

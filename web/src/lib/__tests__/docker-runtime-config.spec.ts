@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const entrypointPath = resolve(process.cwd(), "docker-entrypoint.sh");
 const temporaryDirectories: string[] = [];
 
-function generateRuntimeConfig(customerMode?: string) {
+function generateRuntimeConfig(customerMode?: string, sourceUrl?: string) {
     const directory = mkdtempSync(join(tmpdir(), "canvas-runtime-config-"));
     temporaryDirectories.push(directory);
     const outputPath = join(directory, "config.js");
@@ -20,6 +20,8 @@ function generateRuntimeConfig(customerMode?: string) {
     const env = { ...process.env };
     if (customerMode === undefined) delete env.CUSTOMER_MODE;
     else env.CUSTOMER_MODE = customerMode;
+    if (sourceUrl === undefined) delete env.SOURCE_URL;
+    else env.SOURCE_URL = sourceUrl;
     const result = spawnSync("sh", [scriptPath], { env, encoding: "utf8" });
     expect(result.status, result.stderr).toBe(0);
     return { config: readFileSync(outputPath, "utf8"), buildInfo: readFileSync(join(directory, "build-info.json"), "utf8") };
@@ -47,9 +49,12 @@ describe("Docker runtime customer mode", () => {
     });
 
     it("emits sanitized build provenance without secrets", () => {
-        const result = generateRuntimeConfig("true");
+        const sourceUrl = "https://github.com/customer/infinite-canvas/commit/abc1234";
+        const result = generateRuntimeConfig("true", sourceUrl);
         const info = JSON.parse(result.buildInfo) as Record<string, string>;
         expect(info.source_commit).toBe("unknown");
+        expect(info.source_url).toBe(sourceUrl);
+        expect(result.config).toContain(`SOURCE_URL: "${sourceUrl}"`);
         expect(result.config).not.toContain("Authorization");
         expect(result.config).not.toContain("apiKey");
     });
