@@ -35,7 +35,7 @@ check_provenance() {
     --arg digest 'sha256:03b284dcba12dd1719f55788802001a3f401a224c10edb12441ef40cdbf91ce1' \
     --arg source_commit '8f4f09b' \
     --arg source_url 'https://github.com/john18923689777-maker/infinite-canvas/commit/8f4f09b' \
-    --arg proxy_revision '7cfcb30' \
+    --arg proxy_revision 'ac383eb' \
     --arg build_timestamp '2026-07-19T04:33:53Z' \
     '.instance == $instance and .domain == $domain and .image_tag == $image and .image_digest == $digest and .source_commit == $source_commit and .source_url == $source_url and .proxy_revision == $proxy_revision and .image_build_timestamp == $build_timestamp' \
     "$DIR/$file" >/dev/null || { echo "FAIL $file provenance mismatch" >&2; exit 1; }
