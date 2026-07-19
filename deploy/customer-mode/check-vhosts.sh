@@ -4,12 +4,12 @@ DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 check() {
   file=$1 host=$2 upstream=$3 port=$4 parent=$5
   log_file="/var/log/nginx/${file%.conf}.access.log"
-  for needle in "listen 80" "server_name $host" "return 301 https://$host\$request_uri" "listen 443 ssl http2" "ssl_certificate /etc/letsencrypt/live/$host/fullchain.pem" "ssl_certificate_key /etc/letsencrypt/live/$host/privkey.pem" "gzip on" "gzip_types application/javascript text/css application/json image/svg+xml" "access_log $log_file canvas_redacted" "proxy_pass https://$upstream" "proxy_ssl_server_name on" "proxy_ssl_name $upstream" "proxy_set_header Host $upstream" "location /v1/" "location /v1beta/" "proxy_pass_request_headers off" 'proxy_set_header Authorization $http_authorization' 'proxy_set_header x-goog-api-key $http_x_goog_api_key' 'proxy_set_header X-Request-ID $http_x_request_id' 'proxy_set_header Content-Type $http_content_type' 'proxy_set_header Content-Length $http_content_length' 'proxy_set_header Accept $http_accept' 'proxy_set_header Cookie ""' 'proxy_set_header X-API-Key ""' 'proxy_request_buffering off' 'proxy_buffering off' 'client_max_body_size 268435456' 'proxy_read_timeout 900s' "proxy_pass http://127.0.0.1:$port" "frame-ancestors $parent"; do
+  for needle in "listen 80" "server_name $host" "return 301 https://$host\$request_uri" "listen 443 ssl http2" "ssl_certificate /etc/letsencrypt/live/$host/fullchain.pem" "ssl_certificate_key /etc/letsencrypt/live/$host/privkey.pem" "gzip on" "gzip_comp_level 6" "gzip_types application/javascript text/css application/json image/svg+xml" "location /assets/" 'proxy_hide_header Cache-Control' 'add_header Cache-Control "public, max-age=31536000, immutable" always' "access_log $log_file canvas_redacted" "proxy_pass https://$upstream" "proxy_ssl_server_name on" "proxy_ssl_name $upstream" "proxy_set_header Host $upstream" "location /v1/" "location /v1beta/" "proxy_pass_request_headers off" 'proxy_set_header Authorization $http_authorization' 'proxy_set_header x-goog-api-key $http_x_goog_api_key' 'proxy_set_header X-Request-ID $http_x_request_id' 'proxy_set_header Content-Type $http_content_type' 'proxy_set_header Content-Length $http_content_length' 'proxy_set_header Accept $http_accept' 'proxy_set_header Cookie ""' 'proxy_set_header X-API-Key ""' 'proxy_request_buffering off' 'proxy_buffering off' 'client_max_body_size 268435456' 'proxy_read_timeout 900s' "proxy_pass http://127.0.0.1:$port" "frame-ancestors $parent"; do
     grep -F "$needle" "$DIR/$file" >/dev/null || { echo "FAIL $file: $needle" >&2; exit 1; }
   done
   for hidden_header in 'proxy_hide_header Content-Security-Policy' 'proxy_hide_header X-Frame-Options'; do
-    test "$(grep -Fc "$hidden_header" "$DIR/$file")" -eq 3 || {
-      echo "FAIL $file: $hidden_header must be set in both API locations and the canvas location" >&2
+    test "$(grep -Fc "$hidden_header" "$DIR/$file")" -eq 4 || {
+      echo "FAIL $file: $hidden_header must be set in both API locations, assets and the canvas location" >&2
       exit 1
     }
   done
