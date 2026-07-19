@@ -6,10 +6,11 @@
   "env_file": "env/55ai.env",
   "vhost_file": "canvas-55ai.conf",
   "image_tag": "infinite-canvas-sub2-customer:55ai-8f4f09b",
-  "image_digest": "pending-build",
+  "image_digest": "sha256:03b284dcba12dd1719f55788802001a3f401a224c10edb12441ef40cdbf91ce1",
   "source_commit": "8f4f09b",
-  "source_url": "",
+  "source_url": "https://github.com/john18923689777-maker/infinite-canvas/commit/8f4f09b",
   "proxy_revision": "388415d",
+  "image_build_timestamp": "2026-07-19T04:33:53Z",
   "release_timestamp": "pending-build",
-  "status": "release-blocked-pending-public-source-and-image-build"
+  "status": "candidate-built-pending-public-source-dns-tls-and-rollout"
 }
