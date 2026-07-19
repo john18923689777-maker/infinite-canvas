@@ -1,6 +1,6 @@
 services:
   infinite-canvas-ai16888:
-    image: infinite-canvas-sub2-customer:ai16888-388415d
+    image: infinite-canvas-sub2-customer:ai16888-c85805a
     container_name: infinite-canvas-ai16888
     restart: unless-stopped
     env_file:
