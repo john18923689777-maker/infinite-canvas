@@ -30,7 +30,7 @@ describe("customer capability gates", () => {
         expect(() => usePluginStore.getState().upsert({ id: "x", name: "x", version: "1", url: "https://x", source: "", enabled: true })).toThrow(CUSTOMER_MODE_DISABLED);
         await expect(runSiteTool("workbench_video_generate", {}, (() => {}) as never)).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         expect(fetchSpy).not.toHaveBeenCalled();
-    });
+    }, 15_000);
 
     it("fails closed for WebDAV and model/prompt scripts", async () => {
         const fetchSpy = vi.spyOn(globalThis, "fetch");

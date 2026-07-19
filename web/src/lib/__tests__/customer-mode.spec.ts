@@ -11,6 +11,8 @@ import {
     canImportApiConfig,
     canUseExternalBaseUrl,
     customerGeminiBaseUrl,
+    customerGenerationMode,
+    customerGenerationModes,
     customerOpenAIBaseUrl,
     isCustomerMode,
     resolveCustomerMode,
@@ -97,6 +99,13 @@ describe("browser customer-mode policy", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         expect(canImportApiConfig()).toBe(false);
         expect(canImportAgentConfig()).toBe(false);
+    });
+
+    it("exposes only image and text generation modes in customer mode", () => {
+        vi.stubEnv("VITE_CUSTOMER_MODE", "true");
+        expect(customerGenerationModes()).toEqual(["image", "text"]);
+        expect(customerGenerationMode("video")).toBe("image");
+        expect(customerGenerationMode("audio")).toBe("image");
     });
 
     it("keeps only the isolated iframe presentation query allowlist", () => {

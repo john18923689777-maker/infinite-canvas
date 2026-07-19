@@ -4,6 +4,7 @@ type CustomerModeInputs = {
 };
 
 import type { ConfigTabKey, ModelCapability, ModelChannel } from "@/stores/use-config-store";
+import type { CanvasGenerationMode } from "@/types/canvas";
 
 export const CUSTOMER_MODE_DISABLED = "CUSTOMER_MODE_DISABLED";
 
@@ -24,6 +25,7 @@ export const CUSTOMER_DEFAULT_PATH = "/image";
 const CONFIG_TAB_KEYS: ConfigTabKey[] = ["channels", "preferences", "prompt-sources", "webdav"];
 const CUSTOMER_CONFIG_TAB_KEYS: ConfigTabKey[] = ["channels"];
 const CUSTOMER_SUPPORTED_CAPABILITIES: ReadonlySet<ModelCapability> = new Set(["image", "text"]);
+const GENERATION_MODES: CanvasGenerationMode[] = ["image", "text", "video", "audio"];
 
 export function customerConfigTabKeys(): ConfigTabKey[] {
     return isCustomerMode() ? [...CUSTOMER_CONFIG_TAB_KEYS] : [...CONFIG_TAB_KEYS];
@@ -53,6 +55,14 @@ export function customerConfigChannels(channels: ModelChannel[]): ModelChannel[]
 
 export function customerConfigCapabilityAllowed(capability: ModelCapability) {
     return !isCustomerMode() || CUSTOMER_SUPPORTED_CAPABILITIES.has(capability);
+}
+
+export function customerGenerationModes(): CanvasGenerationMode[] {
+    return isCustomerMode() ? ["image", "text"] : [...GENERATION_MODES];
+}
+
+export function customerGenerationMode(mode: CanvasGenerationMode): CanvasGenerationMode {
+    return customerGenerationModes().includes(mode) ? mode : "image";
 }
 
 export function assertCustomerCapabilityAllowed(capability: ModelCapability) {

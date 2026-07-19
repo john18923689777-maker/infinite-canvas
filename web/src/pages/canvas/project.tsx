@@ -13,7 +13,7 @@ import { uploadMediaFile } from "@/services/file-storage";
 import { nanoid } from "nanoid";
 import { getDataUrlByteSize, readImageMeta } from "@/lib/image-utils";
 import { canvasThemes, type CanvasBackgroundMode } from "@/lib/canvas-theme";
-import { isCustomerMode } from "@/lib/customer-mode";
+import { customerGenerationMode, isCustomerMode } from "@/lib/customer-mode";
 import { useAssetStore } from "@/stores/use-asset-store";
 import { useThemeStore } from "@/stores/use-theme-store";
 import { cropDataUrl, splitDataUrl, upscaleDataUrl } from "@/lib/canvas/canvas-image-data";
@@ -2700,7 +2700,9 @@ function InfiniteCanvasPage() {
                 onStop={confirmStopGeneration}
                 onGenerate={(nodeId) => {
                     const target = nodesRef.current.find((item) => item.id === nodeId);
-                    void handleGenerateNode(nodeId, target?.metadata?.generationMode || "image", target?.metadata?.composerContent ?? target?.metadata?.prompt ?? "");
+                    const mode = customerGenerationMode(target?.metadata?.generationMode || "image");
+                    if (mode !== target?.metadata?.generationMode) handleConfigNodeChange(nodeId, { generationMode: mode });
+                    void handleGenerateNode(nodeId, mode, target?.metadata?.composerContent ?? target?.metadata?.prompt ?? "");
                 }}
             />
         ),
