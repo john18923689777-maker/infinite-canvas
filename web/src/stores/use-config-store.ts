@@ -191,7 +191,7 @@ export const useConfigStore = create<ConfigStore>()(
                     return { config: normalizeCustomerConfig(next) };
                 }),
             updateWebdavConfig: (key, value) =>
-                set((state) => ({
+                set((state) => isCustomerMode() ? { webdav: { ...defaultWebdavSyncConfig } } : ({
                     webdav: {
                         ...state.webdav,
                         [key]: value,
@@ -204,7 +204,7 @@ export const useConfigStore = create<ConfigStore>()(
         }),
         {
             name: CONFIG_STORE_KEY,
-            partialize: (state) => ({ config: state.config, webdav: state.webdav }),
+            partialize: (state) => ({ config: state.config, ...(isCustomerMode() ? {} : { webdav: state.webdav }) }),
             merge: (persisted, current) => {
                 const persistedState = (persisted || {}) as Partial<ConfigStore>;
                 const persistedConfig = (persistedState.config || {}) as Partial<AiConfig>;
@@ -236,7 +236,7 @@ export const useConfigStore = create<ConfigStore>()(
                 });
                 return {
                     ...current,
-                    webdav: { ...defaultWebdavSyncConfig, ...persistedWebdav },
+                    webdav: isCustomerMode() ? { ...defaultWebdavSyncConfig } : { ...defaultWebdavSyncConfig, ...persistedWebdav },
                     config: mergedConfig,
                 };
             },

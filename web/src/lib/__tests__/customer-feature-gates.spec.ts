@@ -47,6 +47,24 @@ describe("customer capability gates", () => {
         expect(fetchSpy).not.toHaveBeenCalled();
     });
 
+    it("fails closed for direct video and audio generation entry points", async () => {
+        const axios = (await import("axios")).default;
+        const postSpy = vi.spyOn(axios, "post");
+        const getSpy = vi.spyOn(axios, "get");
+        const { defaultConfig } = await import("@/stores/use-config-store");
+        const { createVideoGenerationTask, pollVideoGenerationTask, requestVideoGeneration, storeGeneratedVideo } = await import("@/services/api/video");
+        const { requestAudioGeneration, storeGeneratedAudio } = await import("@/services/api/audio");
+
+        await expect(requestVideoGeneration(defaultConfig, "prompt")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(createVideoGenerationTask(defaultConfig, "prompt")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(pollVideoGenerationTask(defaultConfig, { id: "task", provider: "openai", model: "grok-imagine-video" })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(requestAudioGeneration(defaultConfig, "prompt")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(storeGeneratedVideo({ url: "https://media.example/video.mp4" })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(storeGeneratedAudio(new Blob(["audio"], { type: "audio/mpeg" }))).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        expect(postSpy).not.toHaveBeenCalled();
+        expect(getSpy).not.toHaveBeenCalled();
+    });
+
     it("fails closed for direct Agent state actions", async () => {
         const { useAgentStore } = await import("@/stores/use-agent-store");
         const state = useAgentStore.getState();

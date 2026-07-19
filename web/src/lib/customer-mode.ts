@@ -15,7 +15,7 @@ export function assertCapabilityEnabled() {
     if (isCustomerMode()) assertCustomerModeDisabled();
 }
 
-const CUSTOMER_QUERY_KEYS = ["baseUrl", "baseurl", "apiKey", "apikey", "agentUrl", "agentToken"] as const;
+const CUSTOMER_QUERY_ALLOWLIST: ReadonlySet<string> = new Set(["theme", "lang", "ui_mode"]);
 
 export type AppRouteId = "home" | "image" | "video" | "assets" | "prompts" | "canvas" | "canvas-project" | "config";
 
@@ -53,6 +53,10 @@ export function customerConfigChannels(channels: ModelChannel[]): ModelChannel[]
 
 export function customerConfigCapabilityAllowed(capability: ModelCapability) {
     return !isCustomerMode() || CUSTOMER_SUPPORTED_CAPABILITIES.has(capability);
+}
+
+export function assertCustomerCapabilityAllowed(capability: ModelCapability) {
+    if (!customerConfigCapabilityAllowed(capability)) assertCustomerModeDisabled();
 }
 
 const CUSTOMER_ROUTE_IDS: ReadonlySet<AppRouteId> = new Set(["image", "assets", "canvas", "canvas-project"]);
@@ -138,9 +142,9 @@ export function stripCustomerModeQueryParams(value: string) {
             try {
                 key = decodeURIComponent(rawKey.replace(/\+/g, " "));
             } catch {
-                // Keep malformed unrelated query keys visible.
+                // Malformed keys are not recognized by the allowlist and are removed.
             }
-            return !(CUSTOMER_QUERY_KEYS as readonly string[]).includes(key);
+            return CUSTOMER_QUERY_ALLOWLIST.has(key);
         })
         .join("&");
     return query === rawQuery ? value : `${prefix}${query ? `?${query}` : ""}${hash}`;

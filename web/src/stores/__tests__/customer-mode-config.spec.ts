@@ -77,6 +77,35 @@ describe("customer-mode config normalization", () => {
         expect(config.model).toBe("customer::gpt-image-2");
     });
 
+    it("refuses WebDAV state mutations in customer mode", async () => {
+        vi.stubEnv("VITE_CUSTOMER_MODE", "true");
+        const { defaultWebdavSyncConfig, useConfigStore } = await import("@/stores/use-config-store");
+
+        useConfigStore.getState().updateWebdavConfig("url", "https://dav.example");
+        useConfigStore.getState().updateWebdavConfig("username", "customer");
+        useConfigStore.getState().updateWebdavConfig("password", "secret");
+
+        expect(useConfigStore.getState().webdav).toEqual(defaultWebdavSyncConfig);
+        expect(localStorage.getItem("infinite-canvas:ai_config_store")).not.toContain("webdav");
+    });
+
+    it("scrubs persisted WebDAV credentials during customer rehydration", async () => {
+        vi.stubEnv("VITE_CUSTOMER_MODE", "true");
+        const { CONFIG_STORE_KEY, defaultWebdavSyncConfig, useConfigStore } = await import("@/stores/use-config-store");
+        localStorage.setItem(
+            CONFIG_STORE_KEY,
+            JSON.stringify({
+                state: {
+                    webdav: { url: "https://dav.example", username: "customer", password: "secret", directory: "private", lastSyncedAt: "2026-07-19" },
+                },
+            }),
+        );
+
+        await useConfigStore.persist.rehydrate();
+
+        expect(useConfigStore.getState().webdav).toEqual(defaultWebdavSyncConfig);
+    });
+
     it("normalizes persisted external and decorated same-origin URLs during rehydration", async () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         const { CONFIG_STORE_KEY, useConfigStore } = await import("@/stores/use-config-store");

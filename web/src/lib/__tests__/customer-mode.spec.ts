@@ -99,10 +99,10 @@ describe("browser customer-mode policy", () => {
         expect(canImportAgentConfig()).toBe(false);
     });
 
-    it("strips API and Agent secrets while preserving unrelated query state and hash", () => {
+    it("keeps only the isolated iframe presentation query allowlist", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
-        const result = stripCustomerModeQueryParams("/canvas?baseUrl=https%3A%2F%2Fother.example&apiKey=secret&baseurl=x&apikey=y&agentUrl=https%3A%2F%2Fagent&agentToken=token&keep=a%20b#node-7");
-        expect(result).toBe("/canvas?keep=a%20b#node-7");
+        const result = stripCustomerModeQueryParams("/canvas?theme=dark&lang=zh-CN&ui_mode=embedded&baseUrl=https%3A%2F%2Fother.example&apiKey=secret&agentToken=token&keep=a%20b#node-7");
+        expect(result).toBe("/canvas?theme=dark&lang=zh-CN&ui_mode=embedded#node-7");
     });
 
     it("leaves query parameters untouched outside customer mode", () => {
@@ -118,7 +118,7 @@ describe("browser customer-mode policy", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         localStorage.setItem("canvas-agent-url", "http://existing-agent");
         localStorage.setItem("canvas-agent-token", "existing-token");
-        window.history.replaceState(null, "", `/canvas?${sensitiveQuery}&keep=a%20b#node-7`);
+        window.history.replaceState(null, "", `/canvas?theme=dark&lang=zh-CN&ui_mode=embedded&${sensitiveQuery}&keep=a%20b#node-7`);
         const container = document.createElement("div");
         document.body.append(container);
         const root = createRoot(container);
@@ -126,7 +126,7 @@ describe("browser customer-mode policy", () => {
 
         await act(async () => root.render(createElement(ClientRootInit, null, createElement("div"))));
 
-        expect(`${window.location.pathname}${window.location.search}${window.location.hash}`).toBe("/canvas?keep=a%20b#node-7");
+        expect(`${window.location.pathname}${window.location.search}${window.location.hash}`).toBe("/canvas?theme=dark&lang=zh-CN&ui_mode=embedded#node-7");
         expect(rootInitMocks.updateConfig).not.toHaveBeenCalled();
         expect(rootInitMocks.openConfigDialog).not.toHaveBeenCalled();
         expect(rootInitMocks.messageSuccess).not.toHaveBeenCalled();
