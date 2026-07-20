@@ -101,10 +101,10 @@ describe("browser customer-mode policy", () => {
         expect(canImportAgentConfig()).toBe(false);
     });
 
-    it("exposes only image and text generation modes in customer mode", () => {
+    it("exposes image, text, and video generation modes in customer mode", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
-        expect(customerGenerationModes()).toEqual(["image", "text"]);
-        expect(customerGenerationMode("video")).toBe("image");
+        expect(customerGenerationModes()).toEqual(["image", "text", "video"]);
+        expect(customerGenerationMode("video")).toBe("video");
         expect(customerGenerationMode("audio")).toBe("image");
     });
 

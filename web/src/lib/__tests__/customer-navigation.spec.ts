@@ -11,22 +11,22 @@ describe("customer navigation policy", () => {
         delete window.__RUNTIME_CONFIG__;
     });
 
-    it("allows only the image, asset, and canvas workflows in customer mode", () => {
+    it("allows image, video, prompt, asset, and canvas workflows in customer mode", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
 
-        const allowed: AppRouteId[] = ["image", "assets", "canvas", "canvas-project"];
-        const disabled: AppRouteId[] = ["home", "video", "prompts", "config"];
+        const allowed: AppRouteId[] = ["image", "video", "prompts", "assets", "canvas", "canvas-project"];
+        const disabled: AppRouteId[] = ["home", "config"];
 
         expect(allowed.every((routeId) => isCustomerRouteAllowed(routeId))).toBe(true);
         expect(disabled.every((routeId) => !isCustomerRouteAllowed(routeId))).toBe(true);
-        expect(getNavigationTools().map((tool) => tool.slug)).toEqual(["canvas", "image", "assets"]);
+        expect(getNavigationTools().map((tool) => tool.slug)).toEqual(["canvas", "image", "video", "prompts", "assets"]);
     });
 
     it("redirects filtered direct links before their page can render", () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
 
-        expect(customerRouteRedirect("/video")).toBe(CUSTOMER_DEFAULT_PATH);
-        expect(customerRouteRedirect("/prompts")).toBe(CUSTOMER_DEFAULT_PATH);
+        expect(customerRouteRedirect("/video")).toBeNull();
+        expect(customerRouteRedirect("/prompts")).toBeNull();
         expect(customerRouteRedirect("/config")).toBe(CUSTOMER_DEFAULT_PATH);
         expect(customerRouteRedirect("/agent/threads/1")).toBe(CUSTOMER_DEFAULT_PATH);
         expect(customerRouteRedirect("/")).toBe(CUSTOMER_DEFAULT_PATH);

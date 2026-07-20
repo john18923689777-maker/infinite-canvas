@@ -31,7 +31,7 @@ describe("customer configuration policy", () => {
             apiKey: "key",
             apiFormat: "openai",
             models: [{ name: "veo-3", capability: "video" }],
-        }).models).toEqual([]);
+        }).models).toEqual([{ name: "veo-3", capability: "video" }]);
         expect(customerConfigChannel({
             id: "x",
             name: "x",
@@ -43,7 +43,10 @@ describe("customer configuration policy", () => {
                 { name: "grok-imagine-video", capability: "video" },
                 { name: "gpt-4o-mini-tts", capability: "audio" },
             ],
-        }).models).toEqual([{ name: "gpt-image-2", capability: "image" }]);
+        }).models).toEqual([
+            { name: "gpt-image-2", capability: "image" },
+            { name: "grok-imagine-video", capability: "video" },
+        ]);
     });
 
     it("keeps normal configuration policy unchanged outside customer mode", async () => {

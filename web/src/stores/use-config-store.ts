@@ -364,6 +364,7 @@ function normalizeCustomerConfig(config: AiConfig): AiConfig {
     if (!isCustomerMode()) return config;
     const channels = normalizeChannelsForCustomer(config.channels);
     const imageOptions = selectableModelsByCapability({ ...config, channels }, "image");
+    const videoOptions = selectableModelsByCapability({ ...config, channels }, "video");
     const textOptions = selectableModelsByCapability({ ...config, channels }, "text");
     const normalizeAllowed = (value: string, options: string[]) => {
         const normalized = normalizeModelOptionValue(value, channels);
@@ -377,9 +378,9 @@ function normalizeCustomerConfig(config: AiConfig): AiConfig {
         models: modelOptionsFromChannels(channels),
         baseUrl: normalizeBaseUrl(config.baseUrl, config.apiFormat),
         imageModel: normalizeAllowed(config.imageModel || model, imageOptions),
+        videoModel: normalizeAllowed(config.videoModel, videoOptions),
         textModel: normalizeAllowed(config.textModel || model, textOptions),
         model,
-        videoModel: "",
         audioModel: "",
     };
 }

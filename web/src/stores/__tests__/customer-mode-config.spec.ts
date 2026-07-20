@@ -57,14 +57,27 @@ describe("customer-mode config normalization", () => {
 
         const channel = useConfigStore.getState().config.channels[0];
         expect(channel.baseUrl).toBe(window.location.origin);
-        expect(channel.models).toEqual([{ name: "gpt-image-2", capability: "image" }]);
+        expect(channel.models).toEqual([
+            { name: "gpt-image-2", capability: "image" },
+            { name: "veo-3", capability: "video" },
+        ]);
     });
 
     it("does not retain disabled model selections through direct updates", async () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         const { useConfigStore } = await import("@/stores/use-config-store");
         useConfigStore.getState().updateConfig("channels", [
-            { id: "customer", name: "Customer", baseUrl: window.location.origin, apiKey: "key", apiFormat: "openai", models: [{ name: "gpt-image-2", capability: "image" }] },
+            {
+                id: "customer",
+                name: "Customer",
+                baseUrl: window.location.origin,
+                apiKey: "key",
+                apiFormat: "openai",
+                models: [
+                    { name: "gpt-image-2", capability: "image" },
+                    { name: "veo-3", capability: "video" },
+                ],
+            },
         ]);
 
         useConfigStore.getState().updateConfig("videoModel", "customer::veo-3");
@@ -72,7 +85,7 @@ describe("customer-mode config normalization", () => {
         useConfigStore.getState().updateConfig("model", "customer::veo-3");
 
         const config = useConfigStore.getState().config;
-        expect(config.videoModel).toBe("");
+        expect(config.videoModel).toBe("customer::veo-3");
         expect(config.audioModel).toBe("");
         expect(config.model).toBe("customer::gpt-image-2");
     });

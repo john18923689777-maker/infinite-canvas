@@ -16,6 +16,11 @@ export function assertCapabilityEnabled() {
     if (isCustomerMode()) assertCustomerModeDisabled();
 }
 
+/** Prompt sources are public, browser-side content and are safe to read in customer mode. */
+export function assertPromptLibraryAllowed() {
+    return;
+}
+
 const CUSTOMER_QUERY_ALLOWLIST: ReadonlySet<string> = new Set(["theme", "lang", "ui_mode"]);
 
 export type AppRouteId = "home" | "image" | "video" | "assets" | "prompts" | "canvas" | "canvas-project" | "config";
@@ -24,7 +29,7 @@ export const CUSTOMER_DEFAULT_PATH = "/image";
 
 const CONFIG_TAB_KEYS: ConfigTabKey[] = ["channels", "preferences", "prompt-sources", "webdav"];
 const CUSTOMER_CONFIG_TAB_KEYS: ConfigTabKey[] = ["channels"];
-const CUSTOMER_SUPPORTED_CAPABILITIES: ReadonlySet<ModelCapability> = new Set(["image", "text"]);
+const CUSTOMER_SUPPORTED_CAPABILITIES: ReadonlySet<ModelCapability> = new Set(["image", "video", "text"]);
 const GENERATION_MODES: CanvasGenerationMode[] = ["image", "text", "video", "audio"];
 
 export function customerConfigTabKeys(): ConfigTabKey[] {
@@ -58,7 +63,7 @@ export function customerConfigCapabilityAllowed(capability: ModelCapability) {
 }
 
 export function customerGenerationModes(): CanvasGenerationMode[] {
-    return isCustomerMode() ? ["image", "text"] : [...GENERATION_MODES];
+    return isCustomerMode() ? ["image", "text", "video"] : [...GENERATION_MODES];
 }
 
 export function customerGenerationMode(mode: CanvasGenerationMode): CanvasGenerationMode {
@@ -69,7 +74,7 @@ export function assertCustomerCapabilityAllowed(capability: ModelCapability) {
     if (!customerConfigCapabilityAllowed(capability)) assertCustomerModeDisabled();
 }
 
-const CUSTOMER_ROUTE_IDS: ReadonlySet<AppRouteId> = new Set(["image", "assets", "canvas", "canvas-project"]);
+const CUSTOMER_ROUTE_IDS: ReadonlySet<AppRouteId> = new Set(["image", "video", "prompts", "assets", "canvas", "canvas-project"]);
 
 function isExactTrue(value: unknown) {
     return value === true || value === "true";

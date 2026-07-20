@@ -32,7 +32,7 @@ describe("customer capability gates", () => {
         expect(fetchSpy).not.toHaveBeenCalled();
     }, 15_000);
 
-    it("fails closed for WebDAV and model/prompt scripts", async () => {
+    it("fails closed for WebDAV and model scripts while allowing prompt sources", async () => {
         const fetchSpy = vi.spyOn(globalThis, "fetch");
         const { testWebdavConnection } = await import("@/services/webdav-sync");
         const { syncAppDataToWebdav } = await import("@/services/app-sync");
@@ -43,11 +43,13 @@ describe("customer capability gates", () => {
         await expect(syncAppDataToWebdav({ url: "https://dav.example", directory: "", username: "", password: "", lastSyncedAt: "" }, progress)).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         expect(progress).not.toHaveBeenCalled();
         await expect(runModelPlugin({ capability: "text", script: "return 1", config: { model: "m", baseUrl: "", apiKey: "" } as never })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
-        await expect(runPromptSource("return []")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(runPromptSource("return [{ id: 'prompt-1', title: 'Test', prompt: 'A test prompt' }]")).resolves.toEqual([
+            expect.objectContaining({ id: "prompt-1", title: "Test", prompt: "A test prompt" }),
+        ]);
         expect(fetchSpy).not.toHaveBeenCalled();
     });
 
-    it("fails closed for direct video and audio generation entry points", async () => {
+    it("allows direct video generation entry points while keeping audio closed", async () => {
         const axios = (await import("axios")).default;
         const postSpy = vi.spyOn(axios, "post");
         const getSpy = vi.spyOn(axios, "get");
@@ -55,11 +57,11 @@ describe("customer capability gates", () => {
         const { createVideoGenerationTask, pollVideoGenerationTask, requestVideoGeneration, storeGeneratedVideo } = await import("@/services/api/video");
         const { requestAudioGeneration, storeGeneratedAudio } = await import("@/services/api/audio");
 
-        await expect(requestVideoGeneration(defaultConfig, "prompt")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
-        await expect(createVideoGenerationTask(defaultConfig, "prompt")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
-        await expect(pollVideoGenerationTask(defaultConfig, { id: "task", provider: "openai", model: "grok-imagine-video" })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(requestVideoGeneration(defaultConfig, "prompt")).rejects.not.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(createVideoGenerationTask(defaultConfig, "prompt")).rejects.not.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(pollVideoGenerationTask(defaultConfig, { id: "task", provider: "openai", model: "grok-imagine-video" })).rejects.not.toThrow(CUSTOMER_MODE_DISABLED);
         await expect(requestAudioGeneration(defaultConfig, "prompt")).rejects.toThrow(CUSTOMER_MODE_DISABLED);
-        await expect(storeGeneratedVideo({ url: "https://media.example/video.mp4" })).rejects.toThrow(CUSTOMER_MODE_DISABLED);
+        await expect(storeGeneratedVideo({ url: "https://media.example/video.mp4" })).resolves.toEqual(expect.objectContaining({ url: "https://media.example/video.mp4" }));
         await expect(storeGeneratedAudio(new Blob(["audio"], { type: "audio/mpeg" }))).rejects.toThrow(CUSTOMER_MODE_DISABLED);
         expect(postSpy).not.toHaveBeenCalled();
         expect(getSpy).not.toHaveBeenCalled();

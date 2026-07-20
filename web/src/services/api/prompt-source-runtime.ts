@@ -3,7 +3,7 @@
  * a remote list (markdown / json) and `return`s an array of prompt items. It runs with a set of flat
  * helper locals (see PROMPT_SOURCE_VARIABLES) so scripts stay short and declarative.
  */
-import { assertCapabilityEnabled } from "@/lib/customer-mode";
+import { assertPromptLibraryAllowed } from "@/lib/customer-mode";
 
 export type RawPrompt = {
     id: string;
@@ -94,7 +94,7 @@ function makePrompt(input: { id: string; title: string; prompt: string; coverUrl
 
 /** Run a prompt-source script and normalize its result into a deduped RawPrompt[]. */
 export async function runPromptSource(script: string, options?: RunOptions): Promise<RawPrompt[]> {
-    assertCapabilityEnabled();
+    assertPromptLibraryAllowed();
     const body = script.trim();
     if (!body) throw new Error("提示词来源脚本为空");
     const runner = new Function(
