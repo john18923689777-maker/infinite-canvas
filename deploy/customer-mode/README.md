@@ -1,6 +1,6 @@
 # Independent Canvas Deployments
 
-The two vhosts are intentionally separate. `canvas.55ai.xyz` proxies only to `55ai.xyz` and listens on loopback port `3311`; `canvas.ai16888.com.cn` proxies only to `sub2.ai16888.com.cn` and listens on loopback port `3312`.
+The two vhosts are intentionally separate. `canvas.55ai.xyz` proxies only to `55ai.xyz` and listens on loopback port `3311`; `sub.ai16888.com.cn` proxies only to `sub2.ai16888.com.cn` and listens on loopback port `3312`. The ai16888 vhost uses the temporary subdomain; the formal root domain remains owned by the Sub2API site.
 
 Run `sh check-vhosts.sh` before installing either vhost. The redacted access log excludes query strings, authorization headers and request bodies.
 

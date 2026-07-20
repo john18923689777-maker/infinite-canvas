@@ -1,16 +1,16 @@
 {
   "instance": "ai16888",
-  "domain": "canvas.ai16888.com.cn",
+  "domain": "sub.ai16888.com.cn",
   "parent_domain": "sub2.ai16888.com.cn",
   "compose_file": "compose-ai16888.yml",
   "env_file": "env/ai16888.env",
   "vhost_file": "canvas-ai16888.conf",
-  "image_tag": "infinite-canvas-sub2-customer:ai16888-8f4f09b",
-  "image_digest": "sha256:03b284dcba12dd1719f55788802001a3f401a224c10edb12441ef40cdbf91ce1",
-  "source_commit": "8f4f09b",
-  "source_url": "https://github.com/john18923689777-maker/infinite-canvas/commit/8f4f09b",
+  "image_tag": "infinite-canvas-sub2-customer:ai16888-b2527b9",
+  "image_digest": "sha256:f8bf8993c8c377d3d51cad0225c109b909bab83770687ef76cd4399bcabb5679",
+  "source_commit": "b2527b9",
+  "source_url": "https://github.com/john18923689777-maker/infinite-canvas/commit/b2527b9",
   "proxy_revision": "ac383eb",
-  "image_build_timestamp": "2026-07-19T04:33:53Z",
-  "release_timestamp": "2026-07-19T13:28:54Z",
-  "status": "production-running-pending-public-source-and-image-upstream-configuration"
+  "image_build_timestamp": "2026-07-20T04:47:19Z",
+  "release_timestamp": "2026-07-20T04:50:29Z",
+  "status": "production-running-subdomain-pending-dns-and-certificate"
 }

@@ -28,4 +28,4 @@ check() {
   echo "PASS $file"
 }
 check canvas-55ai.conf canvas.55ai.xyz 55ai.xyz 3311 https://55ai.xyz
-check canvas-ai16888.conf canvas.ai16888.com.cn sub2.ai16888.com.cn 3312 https://sub2.ai16888.com.cn
+check canvas-ai16888.conf sub.ai16888.com.cn sub2.ai16888.com.cn 3312 https://sub2.ai16888.com.cn
