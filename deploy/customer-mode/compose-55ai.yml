@@ -1,6 +1,6 @@
 services:
   infinite-canvas-55ai:
-    image: infinite-canvas-sub2-customer:55ai-6845289
+    image: infinite-canvas-sub2-customer:55ai-79c8d64
     container_name: infinite-canvas-55ai
     restart: unless-stopped
     env_file:

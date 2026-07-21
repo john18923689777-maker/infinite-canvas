@@ -41,14 +41,14 @@ check_provenance() {
     "$DIR/$file" >/dev/null || { echo "FAIL $file provenance mismatch" >&2; exit 1; }
 }
 
-check_file compose-55ai.yml infinite-canvas-55ai 3311 55ai.env infinite-canvas-sub2-customer:55ai-6845289
+check_file compose-55ai.yml infinite-canvas-55ai 3311 55ai.env infinite-canvas-sub2-customer:55ai-79c8d64
 check_file compose-ai16888.yml infinite-canvas-ai16888 3312 ai16888.env infinite-canvas-sub2-customer:ai16888-b2527b9
-source_url_55ai=https://github.com/john18923689777-maker/infinite-canvas/commit/6845289
+source_url_55ai=https://github.com/john18923689777-maker/infinite-canvas/commit/79c8d64
 source_url_ai16888=https://github.com/john18923689777-maker/infinite-canvas/commit/b2527b9
-build_timestamp_55ai=2026-07-20T04:03:07Z
+build_timestamp_55ai=2026-07-21T08:57:56Z
 build_timestamp_ai16888=2026-07-20T04:47:19Z
-check_env 55ai.env 55ai infinite-canvas-sub2-customer:55ai-6845289 "$source_url_55ai" "$build_timestamp_55ai"
+check_env 55ai.env 55ai infinite-canvas-sub2-customer:55ai-79c8d64 "$source_url_55ai" "$build_timestamp_55ai"
 check_env ai16888.env ai16888 infinite-canvas-sub2-customer:ai16888-b2527b9 "$source_url_ai16888" "$build_timestamp_ai16888"
-check_provenance provenance-55ai.json 55ai canvas.55ai.xyz infinite-canvas-sub2-customer:55ai-6845289 sha256:bb788bd6871d32bcdd7361973946f6108d19dcd3c4997a887ce7654d7f77ca96 6845289 "$source_url_55ai" ac383eb "$build_timestamp_55ai"
+check_provenance provenance-55ai.json 55ai canvas.55ai.xyz infinite-canvas-sub2-customer:55ai-79c8d64 sha256:f34c8c9e4a27b00327d611a8349ab203eb07084ff599a9e8e55b1730b7fb068b 79c8d64 "$source_url_55ai" ac383eb "$build_timestamp_55ai"
 check_provenance provenance-ai16888.json ai16888 sub.ai16888.com.cn infinite-canvas-sub2-customer:ai16888-b2527b9 sha256:f8bf8993c8c377d3d51cad0225c109b909bab83770687ef76cd4399bcabb5679 b2527b9 "$source_url_ai16888" ac383eb "$build_timestamp_ai16888"
 cmp -s "$DIR/env/55ai.env" "$DIR/env/ai16888.env" && { echo "FAIL env files must differ" >&2; exit 1; } || true
