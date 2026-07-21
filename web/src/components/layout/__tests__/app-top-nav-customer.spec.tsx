@@ -48,6 +48,7 @@ describe("AppTopNav customer configuration", () => {
         );
 
         expect(container.querySelector('[aria-label="配置"]')).not.toBeNull();
+        expect(container.querySelector('[aria-label="配置"] svg.lucide-settings')).not.toBeNull();
         expect(container.querySelector('[data-testid="app-config-modal"]')).not.toBeNull();
         expect(container.querySelector('[aria-label="打开 Agent"]')).toBeNull();
     });
