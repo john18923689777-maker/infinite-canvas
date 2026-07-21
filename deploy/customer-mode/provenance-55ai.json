@@ -5,12 +5,12 @@
   "compose_file": "compose-55ai.yml",
   "env_file": "env/55ai.env",
   "vhost_file": "canvas-55ai.conf",
-  "image_tag": "infinite-canvas-sub2-customer:55ai-79c8d64",
-  "image_digest": "sha256:f34c8c9e4a27b00327d611a8349ab203eb07084ff599a9e8e55b1730b7fb068b",
-  "source_commit": "79c8d64",
-  "source_url": "https://github.com/john18923689777-maker/infinite-canvas/commit/79c8d64",
+  "image_tag": "infinite-canvas-sub2-customer:55ai-cbdd782",
+  "image_digest": "sha256:cf194bc1bafd3a3ae1ecdee71d4c2043cf28ebab016892dbc2bfb8fab8ff5533",
+  "source_commit": "cbdd782",
+  "source_url": "https://github.com/john18923689777-maker/infinite-canvas/commit/cbdd782",
   "proxy_revision": "ac383eb",
-  "image_build_timestamp": "2026-07-21T08:57:56Z",
-  "release_timestamp": "2026-07-21T08:58:41Z",
-  "status": "production-pending-customer-config-action"
+  "image_build_timestamp": "2026-07-21T09:11:06Z",
+  "release_timestamp": "2026-07-21T09:12:17Z",
+  "status": "production-pending-customer-config-gear-verification"
 }
