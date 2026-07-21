@@ -89,14 +89,14 @@ export function AppTopNav() {
                                     <Button type="text" shape="circle" className="!h-8 !w-8 !min-w-8" icon={<Bot className="size-4" />} onClick={togglePanel} aria-label="打开 Agent" />
                                 </Tooltip>
                             ) : null}
-                            <UserStatusActions showConfig={!customerMode} />
+                            <UserStatusActions />
                         </div>
                     </div>
                 </header>
             ) : null}
 
             <MobileNavDrawer open={mobileNavOpen} activeToolSlug={activeToolSlug} onClose={() => setMobileNavOpen(false)} />
-            {!customerMode ? <AppConfigModal /> : null}
+            <AppConfigModal />
         </>
     );
 }

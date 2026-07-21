@@ -139,7 +139,7 @@ export function CanvasTopBar({
                 </div>
 
                 <div className="pointer-events-auto flex items-center gap-1.5">
-                    <UserStatusActions variant="canvas" showConfig={!customerMode} onOpenShortcuts={() => setShortcutsOpen(true)} onOpenPlugins={customerMode ? undefined : onOpenPlugins} />
+                    <UserStatusActions variant="canvas" onOpenShortcuts={() => setShortcutsOpen(true)} onOpenPlugins={customerMode ? undefined : onOpenPlugins} />
                     {!customerMode ? (
                         <>
                             <span className="h-6 w-px" style={{ background: theme.toolbar.border }} />

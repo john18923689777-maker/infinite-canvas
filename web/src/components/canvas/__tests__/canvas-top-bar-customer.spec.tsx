@@ -60,13 +60,13 @@ describe("CanvasTopBar customer controls", () => {
         container.remove();
     });
 
-    it("hides Codex, Agent, and config controls in customer mode", async () => {
+    it("hides Codex and Agent while keeping config available in customer mode", async () => {
         vi.stubEnv("VITE_CUSTOMER_MODE", "true");
         await act(async () => root.render(<CanvasTopBar {...props} />));
 
         expect(container.textContent).not.toContain("Codex");
         expect(Array.from(container.querySelectorAll("button")).some((button) => button.textContent?.trim() === "Agent")).toBe(false);
-        expect(container.querySelector('[aria-label="配置"]')).toBeNull();
+        expect(container.querySelector('[aria-label="配置"]')).not.toBeNull();
     });
 
     it("retains Codex, Agent, and config controls outside customer mode", async () => {
